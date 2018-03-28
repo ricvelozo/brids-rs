@@ -1,0 +1,63 @@
+# ```brids-rs```
+
+Parse and generate random ICN/CPF and CNPJ (soon), Brazil's ID numbers.
+
+## Usage
+
+First, add the following to your `Cargo.toml`:
+
+```toml
+[dependencies]
+brids = "0.1"
+```
+
+Next, add this to your crate root:
+
+```rust
+extern crate brids;
+```
+
+## Examples
+
+Parse and format:
+
+```rust
+extern crate brids;
+
+use brids::Cpf;
+use std::io::{stdin, stdout, Write};
+
+fn main() {
+    print!("Input a CPF number: ");
+    stdout().flush().ok();
+
+    let mut input = String::with_capacity(14);
+    stdin().read_line(&mut input).ok();
+
+    match input.trim().parse::<Cpf>() {
+        Ok(cpf) => println!("{} is a valid CPF number.", cpf),
+        Err(_) => println!("Invalid number."),
+    }
+}
+```
+
+Generate a random CPF number:
+
+```rust
+extern crate brids;
+
+use brids::Cpf;
+
+fn main() {
+    println!("Random CPF number: {}", Cpf::generate());
+}
+```
+
+## License
+
+```brids-rs``` is licensed under either of the following, at your option:
+
+*   Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or
+    https://www.apache.org/licenses/LICENSE-2.0)
+*   MIT License ([LICENSE-MIT](LICENSE-MIT) or
+    https://opensource.org/licenses/MIT)
