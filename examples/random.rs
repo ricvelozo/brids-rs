@@ -8,8 +8,9 @@
 
 extern crate brids;
 
-use brids::Cpf;
+use brids::{Cnpj, Cpf};
 
 fn main() {
-    println!("Random CPF number: {}", Cpf::generate());
+    println!("Random CNPJ number: {}", Cnpj::generate());
+    println!("Random CPF/ICN number: {}", Cpf::generate());
 }

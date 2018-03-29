@@ -15,31 +15,31 @@ use self::rand::{thread_rng, Rand, Rng};
 use std::fmt;
 use std::str::FromStr;
 
-/// An error which can be returned when parsing an CPF/ICN number.
+/// An error which can be returned when parsing an CNPJ number.
 #[derive(Debug, PartialEq, Eq)]
-pub enum ParseCpfError {
+pub enum ParseCnpjError {
     Empty,
     InvalidDigit,
     InvalidNumber,
 }
 
-/// A valid CPF/ICN number. Parsing recognizes numbers with or without separators (dot, minus,
-/// slash, and space).
+/// A valid CNPJ number. Parsing recognizes numbers with or without separators (dot, minus, slash,
+/// and space).
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub struct Cpf {
-    numbers: [u8; 11],
+pub struct Cnpj {
+    numbers: [u8; 14],
 }
 
-impl Cpf {
+impl Cnpj {
     /// Returns an array of bytes containing the numbers.
     ///
     /// # Examples
     ///
     /// ```rust
-    /// use brids::Cpf;
+    /// use brids::Cnpj;
     ///
-    /// let cpf = Cpf::generate();
-    /// let bytes = cpf.as_bytes();
+    /// let cnpj = Cnpj::generate();
+    /// let bytes = cnpj.as_bytes();
     /// ```
     #[inline]
     pub fn as_bytes(&self) -> &[u8] {
@@ -56,9 +56,9 @@ impl Cpf {
     /// Basic use:
     ///
     /// ```rust
-    /// use brids::Cpf;
+    /// use brids::Cnpj;
     ///
-    /// let cpf = Cpf::generate();
+    /// let cnpj = Cnpj::generate();
     /// ```
     #[cfg(feature = "random")]
     #[inline]
@@ -67,12 +67,15 @@ impl Cpf {
     }
 }
 
-impl fmt::Display for Cpf {
+impl fmt::Display for Cnpj {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for (i, number) in self.numbers.iter().enumerate() {
-            if i % 9 == 0 && i != 0 {
+        write!(f, "{}{}.", self.numbers[0], self.numbers[1])?;
+        for (i, number) in self.numbers.iter().skip(2).enumerate() {
+            if i % 10 == 0 && i != 0 {
                 write!(f, "-")?;
-            } else if i % 3 == 0 && i != 0 {
+            } else if i % 6 == 0 && i != 0 {
+                write!(f, "/")?;
+            } else if i % 3 == 0 && i != 0 && i < 6 {
                 write!(f, ".")?;
             }
             write!(f, "{}", number)?;
@@ -81,20 +84,20 @@ impl fmt::Display for Cpf {
     }
 }
 
-impl FromStr for Cpf {
-    type Err = ParseCpfError;
+impl FromStr for Cnpj {
+    type Err = ParseCnpjError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut numbers = [0; 11];
+        let mut numbers = [0; 14];
 
         // Must start with a number
         let mut chars = s.chars();
         let first_number = match chars.next() {
             Some(c) => match c {
                 c @ '0'...'9' => c.to_digit(10).unwrap() as u8,
-                _ => return Err(ParseCpfError::InvalidDigit),
+                _ => return Err(ParseCnpjError::InvalidDigit),
             },
-            None => return Err(ParseCpfError::Empty),
+            None => return Err(ParseCnpjError::Empty),
         };
         numbers[0] = first_number;
 
@@ -107,23 +110,23 @@ impl FromStr for Cpf {
                     i += 1;
                 }
                 '.' | '-' | '/' | ' ' => continue,
-                _ => return Err(ParseCpfError::InvalidDigit),
+                _ => return Err(ParseCnpjError::InvalidDigit),
             };
         }
 
         // Checks for repeated numbers
         if numbers.iter().all(|&c| c == first_number) {
-            return Err(ParseCpfError::InvalidNumber);
+            return Err(ParseCnpjError::InvalidNumber);
         }
 
         for i in 0..2 {
-            let check_digit = numbers[9 + i];
+            let check_digit = numbers[12 + i];
             let mut remainder = numbers
                 .iter()
                 // Includes the first check digit in the second iteration
-                .take(9 + i)
-                // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
-                .zip((2..11 + i).rev())
+                .take(12 + i)
+                // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
+                .zip((2..10).chain(2..6 + i).rev())
                 .map(|(&n, x)| n as u32 * x as u32)
                 .sum::<u32>() * 10 % 11;
 
@@ -132,7 +135,7 @@ impl FromStr for Cpf {
             }
 
             if remainder != check_digit as u32 {
-                return Err(ParseCpfError::InvalidNumber);
+                return Err(ParseCnpjError::InvalidNumber);
             }
         }
 
@@ -141,11 +144,11 @@ impl FromStr for Cpf {
 }
 
 #[cfg(feature = "random")]
-impl Rand for Cpf {
+impl Rand for Cnpj {
     #[inline]
     fn rand<R: Rng>(rng: &mut R) -> Self {
-        let mut numbers = [0; 11];
-        for number in numbers.iter_mut().take(9) {
+        let mut numbers = [0; 14];
+        for number in numbers.iter_mut().take(12) {
             *number = rng.gen_range(0, 9);
         }
 
@@ -153,9 +156,9 @@ impl Rand for Cpf {
             let mut check_digit = numbers
                 .iter()
                 // Includes the first check digit in the second iteration
-                .take(9 + i)
-                // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
-                .zip((2..11 + i).rev())
+                .take(12 + i)
+                // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
+                .zip((2..10).chain(2..6 + i).rev())
                 .map(|(&n, x)| n as u32 * x as u32)
                 .sum::<u32>() * 10 % 11;
 
@@ -163,7 +166,7 @@ impl Rand for Cpf {
                 check_digit = 0;
             }
 
-            numbers[9 + i] = check_digit as u8;
+            numbers[12 + i] = check_digit as u8;
         }
 
         Self { numbers }
@@ -176,9 +179,9 @@ mod tests {
 
     #[test]
     fn test_as_bytes() {
-        let a: [u8; 11] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9];
-        let b = Cpf {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
+        let a: [u8; 14] = [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5];
+        let b = Cnpj {
+            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
         };
 
         assert_eq!(a, *b.as_bytes());
@@ -187,40 +190,38 @@ mod tests {
     #[cfg(feature = "random")]
     #[test]
     fn test_generate() {
-        let a = Cpf::generate();
-        let b = a.to_string().parse::<Cpf>().unwrap();
+        let a = Cnpj::generate();
+        let b = a.to_string().parse::<Cnpj>().unwrap();
 
         assert_eq!(a, b);
     }
 
     #[test]
-    fn test_cpf_fmt() {
-        let a = "123.456.789-09";
-        let b = Cpf {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
+    fn test_cnpj_fmt() {
+        let a = "12.345.678/0001-95";
+        let b = Cnpj {
+            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
         };
 
         assert_eq!(a, b.to_string());
     }
 
     #[test]
-    fn test_cpf_from_str() {
-        let a = "123.456.789-09".parse::<Cpf>().unwrap();
-        let b = "123.456.789/09".parse::<Cpf>().unwrap();
-        let c = "12345678909".parse::<Cpf>().unwrap();
-        let d = "123 456 789 09".parse::<Cpf>().unwrap();
+    fn test_cnpj_from_str() {
+        let a = "12.345.678/0001-95".parse::<Cnpj>().unwrap();
+        let b = "12345678000195".parse::<Cnpj>().unwrap();
+        let c = "12 345 678 0001 95".parse::<Cnpj>().unwrap();
 
         assert_eq!(a, b);
         assert_eq!(a, c);
-        assert_eq!(a, d);
-        assert_eq!("".parse::<Cpf>(), Err(ParseCpfError::Empty));
+        assert_eq!("".parse::<Cnpj>(), Err(ParseCnpjError::Empty));
         assert_eq!(
-            "123;456;789/09".parse::<Cpf>(),
-            Err(ParseCpfError::InvalidDigit)
+            "12;345;678/0001-95".parse::<Cnpj>(),
+            Err(ParseCnpjError::InvalidDigit)
         );
         assert_eq!(
-            "123.456.789-10".parse::<Cpf>(),
-            Err(ParseCpfError::InvalidNumber)
+            "12.345.678/0001-96".parse::<Cnpj>(),
+            Err(ParseCnpjError::InvalidNumber)
         );
     }
 }

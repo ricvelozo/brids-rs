@@ -9,7 +9,7 @@
 [Documentation]: https://docs.rs/brids/badge.svg
 [docs.rs]: https://docs.rs/brids
 
-Parse and generate random ICN/CPF and CNPJ (soon), Brazil's ID numbers.
+Parse and generate random CPF/ICN and CNPJ, Brazil's ID numbers.
 
 ## Usage
 
@@ -50,14 +50,15 @@ fn main() {
 }
 ```
 
-Generate a random CPF number:
+Generate random CNPJ and CPF/ICN numbers:
 
 ```rust
 extern crate brids;
 
-use brids::Cpf;
+use brids::{Cnpj, Cpf};
 
 fn main() {
+    println!("Random CNPJ number: {}", Cnpj::generate());
     println!("Random CPF number: {}", Cpf::generate());
 }
 ```

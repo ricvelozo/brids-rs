@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Ricardo Silva Veloso <ricvelozo@gmail.com>"]
 license = "MIT/Apache-2.0"
 description = """
-Parse and generate random ICN/CPF and CNPJ (soon), Brazil's ID numbers.
+Parse and generate random CPF/ICN and CNPJ, Brazil's ID numbers.
 """
 repository = "https://github.com/ricvelozo/brids-rs"
 documentation = "https://docs.rs/brids"
