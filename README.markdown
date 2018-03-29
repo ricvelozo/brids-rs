@@ -1,4 +1,13 @@
-# ```brids-rs```
+# brids
+
+[![Build status]][travis-ci.org] [![Latest version]][crates.io] [![Documentation]][docs.rs]
+
+[Build Status]: https://api.travis-ci.org/ricvelozo/brids-rs.svg?branch=master
+[travis-ci.org]: https://travis-ci.org/ricvelozo/brids-rs
+[Latest Version]: https://img.shields.io/crates/v/brids.svg
+[crates.io]: https://crates.io/crates/brids
+[Documentation]: https://docs.rs/brids/badge.svg
+[docs.rs]: https://docs.rs/brids
 
 Parse and generate random ICN/CPF and CNPJ (soon), Brazil's ID numbers.
 
@@ -55,7 +64,7 @@ fn main() {
 
 ## License
 
-```brids-rs``` is licensed under either of the following, at your option:
+`brids` is licensed under either of the following, at your option:
 
 *   Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or
     https://www.apache.org/licenses/LICENSE-2.0)
