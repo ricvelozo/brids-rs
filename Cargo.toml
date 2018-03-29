@@ -1,6 +1,6 @@
 [package]
 name = "brids"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Ricardo Silva Veloso <ricvelozo@gmail.com>"]
 license = "MIT/Apache-2.0"
 description = """
