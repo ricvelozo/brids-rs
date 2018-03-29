@@ -12,6 +12,9 @@ keywords = ["parser", "format", "validation", "cpf", "cnpj"]
 categories = ["parser-implementations", "value-formatting"]
 readme = "README.markdown"
 
+[badges]
+travis-ci = { repository = "ricvelozo/brids-rs" }
+
 [features]
 default = ["random"]
 random = ["rand"]
