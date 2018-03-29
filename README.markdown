@@ -17,7 +17,7 @@ First, add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-brids = "0.1"
+brids = "0.2"
 ```
 
 Next, add this to your crate root:
