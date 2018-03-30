@@ -7,13 +7,8 @@
 // except according to those terms.
 
 #[cfg(feature = "random")]
-extern crate rand;
-
-#[cfg(feature = "random")]
-use self::rand::{thread_rng, Rand, Rng};
-
-use std::fmt;
-use std::str::FromStr;
+use rand::{thread_rng, Rand, Rng};
+use std::{fmt, str::FromStr};
 
 /// An error which can be returned when parsing an CPF/ICN number.
 #[derive(Debug, PartialEq, Eq)]

@@ -1,6 +1,8 @@
 # brids
 
-[![Build status]][travis-ci.org] [![Latest version]][crates.io] [![Documentation]][docs.rs]
+[![Build status]][travis-ci.org]
+[![Latest version]][crates.io]
+[![Documentation]][docs.rs]
 
 [Build Status]: https://api.travis-ci.org/ricvelozo/brids-rs.svg?branch=master
 [travis-ci.org]: https://travis-ci.org/ricvelozo/brids-rs

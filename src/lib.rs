@@ -87,6 +87,9 @@
 //! }
 //! ```
 
+#[cfg(feature = "random")]
+extern crate rand;
+
 mod cpf;
 mod cnpj;
 
