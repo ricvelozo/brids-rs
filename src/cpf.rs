@@ -26,7 +26,7 @@ pub struct Cpf {
 }
 
 impl Cpf {
-    /// Returns an array of bytes containing the numbers.
+    /// Returns a byte slice of the numbers.
     ///
     /// # Examples
     ///

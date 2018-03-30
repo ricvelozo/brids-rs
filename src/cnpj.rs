@@ -26,7 +26,7 @@ pub struct Cnpj {
 }
 
 impl Cnpj {
-    /// Returns an array of bytes containing the numbers.
+    /// Returns a byte slice of the numbers.
     ///
     /// # Examples
     ///
