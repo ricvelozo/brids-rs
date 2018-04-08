@@ -100,6 +100,6 @@ extern crate matches;
 mod cpf;
 mod cnpj;
 
-pub use cpf::Cpf;
+pub use cpf::*;
 pub type Icn = Cpf;
-pub use cnpj::Cnpj;
+pub use cnpj::*;

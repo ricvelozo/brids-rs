@@ -15,8 +15,8 @@ use std::{fmt, str::FromStr};
 pub enum ParseCnpjError {
     #[fail(display = "Empty string.")]
     Empty,
-    #[fail(display = "Invalid digit '{}'.", _0)]
-    InvalidDigit(char),
+    #[fail(display = "Invalid character `{}` at offset {}.", _0, _1)]
+    InvalidCharacter(char, usize),
     #[fail(display = "Invalid CNPJ number.")]
     InvalidNumber,
 }
@@ -93,7 +93,7 @@ impl FromStr for Cnpj {
         let first_number = match chars.next() {
             Some(c) => match c {
                 '0'...'9' => c.to_digit(10).unwrap() as u8,
-                _ => return Err(ParseCnpjError::InvalidDigit(c)),
+                _ => return Err(ParseCnpjError::InvalidCharacter(c, 0)),
             },
             None => return Err(ParseCnpjError::Empty),
         };
@@ -101,14 +101,14 @@ impl FromStr for Cnpj {
 
         // Checks for invalid symbols and converts numbers to integers
         let mut i = 0;
-        for c in chars {
+        for (offset, c) in chars.enumerate() {
             match c {
                 '0'...'9' => {
                     numbers[i + 1] = c.to_digit(10).unwrap() as u8;
                     i += 1;
                 }
                 '.' | '-' | '/' | ' ' => continue,
-                _ => return Err(ParseCnpjError::InvalidDigit(c)),
+                _ => return Err(ParseCnpjError::InvalidCharacter(c, offset + 1)),
             };
         }
 
@@ -215,7 +215,7 @@ mod tests {
         matches!("".parse::<Cnpj>(), Err(ParseCnpjError::Empty));
         matches!(
             "12;345;678/0001-95".parse::<Cnpj>(),
-            Err(ParseCnpjError::InvalidDigit(_))
+            Err(ParseCnpjError::InvalidCharacter(_, _))
         );
         matches!(
             "12.345.678/0001-96".parse::<Cnpj>(),

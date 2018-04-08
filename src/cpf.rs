@@ -15,8 +15,8 @@ use std::{fmt, str::FromStr};
 pub enum ParseCpfError {
     #[fail(display = "Empty string.")]
     Empty,
-    #[fail(display = "Invalid digit '{}'.", _0)]
-    InvalidDigit(char),
+    #[fail(display = "Invalid character `{}` at offset {}.", _0, _1)]
+    InvalidCharacter(char, usize),
     #[fail(display = "Invalid CPF number.")]
     InvalidNumber,
 }
@@ -90,7 +90,7 @@ impl FromStr for Cpf {
         let first_number = match chars.next() {
             Some(c) => match c {
                 '0'...'9' => c.to_digit(10).unwrap() as u8,
-                _ => return Err(ParseCpfError::InvalidDigit(c)),
+                _ => return Err(ParseCpfError::InvalidCharacter(c, 0)),
             },
             None => return Err(ParseCpfError::Empty),
         };
@@ -98,14 +98,14 @@ impl FromStr for Cpf {
 
         // Checks for invalid symbols and converts numbers to integers
         let mut i = 0;
-        for c in chars {
+        for (offset, c) in chars.enumerate() {
             match c {
                 '0'...'9' => {
                     numbers[i + 1] = c.to_digit(10).unwrap() as u8;
                     i += 1;
                 }
                 '.' | '-' | '/' | ' ' => continue,
-                _ => return Err(ParseCpfError::InvalidDigit(c)),
+                _ => return Err(ParseCpfError::InvalidCharacter(c, offset + 1)),
             };
         }
 
@@ -214,7 +214,7 @@ mod tests {
         matches!("".parse::<Cpf>(), Err(ParseCpfError::Empty));
         matches!(
             "123;456;789/09".parse::<Cpf>(),
-            Err(ParseCpfError::InvalidDigit(_))
+            Err(ParseCpfError::InvalidCharacter(_, _))
         );
         matches!(
             "123.456.789-10".parse::<Cpf>(),
