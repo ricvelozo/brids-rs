@@ -196,13 +196,23 @@ mod tests {
     }
 
     #[test]
-    fn test_cpf_fmt() {
+    fn test_cpf_debug() {
+        let a = "Cpf(\"123.456.789-09\")";
+        let b = Cpf {
+            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
+        };
+
+        assert_eq!(a, format!("{:?}", b));
+    }
+
+    #[test]
+    fn test_cpf_display() {
         let a = "123.456.789-09";
         let b = Cpf {
             numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
         };
 
-        assert_eq!(a, b.to_string());
+        assert_eq!(a, format!("{}", b));
     }
 
     #[test]
