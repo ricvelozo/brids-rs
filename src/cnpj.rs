@@ -23,7 +23,7 @@ pub enum ParseCnpjError {
 
 /// A valid CNPJ number. Parsing recognizes numbers with or without separators (dot, minus, slash,
 /// and space).
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct Cnpj {
     numbers: [u8; 14],
 }

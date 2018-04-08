@@ -23,7 +23,7 @@ pub enum ParseCpfError {
 
 /// A valid CPF/ICN number. Parsing recognizes numbers with or without separators (dot, minus,
 /// slash, and space).
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct Cpf {
     numbers: [u8; 11],
 }
