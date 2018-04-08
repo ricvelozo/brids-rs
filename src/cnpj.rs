@@ -152,9 +152,10 @@ impl Rand for Cnpj {
     #[inline]
     fn rand<R: Rng>(rng: &mut R) -> Self {
         let mut numbers = [0; 14];
-        for number in numbers.iter_mut().take(12) {
+        for number in numbers.iter_mut().take(8) {
             *number = rng.gen_range(0, 9);
         }
+        numbers[11] = 1; // Company headquarters
 
         for i in 0..2 {
             let mut check_digit = numbers
