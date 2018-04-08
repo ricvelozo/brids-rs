@@ -23,7 +23,7 @@ pub enum ParseCpfError {
 
 /// A valid CPF/ICN number. Parsing recognizes numbers with or without separators (dot, minus,
 /// slash, and space).
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Cpf {
     numbers: [u8; 11],
 }
@@ -62,6 +62,12 @@ impl Cpf {
     #[inline]
     pub fn generate() -> Self {
         thread_rng().gen()
+    }
+}
+
+impl fmt::Debug for Cpf {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Cpf(\"{}\")", self.to_string())
     }
 }
 

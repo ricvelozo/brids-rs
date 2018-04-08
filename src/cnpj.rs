@@ -23,7 +23,7 @@ pub enum ParseCnpjError {
 
 /// A valid CNPJ number. Parsing recognizes numbers with or without separators (dot, minus, slash,
 /// and space).
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Cnpj {
     numbers: [u8; 14],
 }
@@ -62,6 +62,12 @@ impl Cnpj {
     #[inline]
     pub fn generate() -> Self {
         thread_rng().gen()
+    }
+}
+
+impl fmt::Debug for Cnpj {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Cnpj(\"{}\")", self.to_string())
     }
 }
 
