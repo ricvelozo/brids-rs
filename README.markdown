@@ -19,7 +19,7 @@ First, add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-brids = "0.2"
+brids = "0.3"
 ```
 
 Next, add this to your crate root:
@@ -47,7 +47,7 @@ fn main() {
 
     match input.trim().parse::<Cpf>() {
         Ok(cpf) => println!("{} is a valid number.", cpf),
-        Err(_) => println!("Invalid number."),
+        Err(err) => println!("Error: {}", err),
     }
 }
 ```

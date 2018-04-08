@@ -14,7 +14,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! brids = "0.1"
+//! brids = "0.3"
 //! ```
 //!
 //! Next, add this to your crate root:
@@ -31,7 +31,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! brids = { version = "0.1", default-features = false }
+//! brids = { version = "0.3", default-features = false }
 //! ```
 //!
 //! # Examples
