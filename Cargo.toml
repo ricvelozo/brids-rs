@@ -20,4 +20,8 @@ default = ["random"]
 random = ["rand"]
 
 [dependencies]
+failure = "0.1.1"
 rand = { version = "0.4", optional = true }
+
+[dev-dependencies]
+matches = "0.1.6"

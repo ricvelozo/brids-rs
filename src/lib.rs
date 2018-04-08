@@ -53,7 +53,7 @@
 //!
 //!     match input.trim().parse::<Cpf>() {
 //!         Ok(cpf) => println!("{} is a valid number.", cpf),
-//!         Err(_) => println!("Invalid number."),
+//!         Err(err) => println!("Error: {}", err),
 //!     }
 //! }
 //! ```
@@ -87,8 +87,15 @@
 //! }
 //! ```
 
+#[macro_use]
+extern crate failure;
+
 #[cfg(feature = "random")]
 extern crate rand;
+
+#[cfg(test)]
+#[macro_use]
+extern crate matches;
 
 mod cpf;
 mod cnpj;

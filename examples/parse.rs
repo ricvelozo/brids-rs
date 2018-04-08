@@ -20,6 +20,6 @@ fn main() {
 
     match input.trim().parse::<Cpf>() {
         Ok(cpf) => println!("{} is a valid number.", cpf),
-        Err(_) => println!("Invalid number."),
+        Err(err) => println!("Error: {}", err),
     }
 }

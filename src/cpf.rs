@@ -11,16 +11,19 @@ use rand::{thread_rng, Rand, Rng};
 use std::{fmt, str::FromStr};
 
 /// An error which can be returned when parsing an CPF/ICN number.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Fail, Debug)]
 pub enum ParseCpfError {
+    #[fail(display = "Empty string.")]
     Empty,
-    InvalidDigit,
+    #[fail(display = "Invalid digit '{}'.", _0)]
+    InvalidDigit(char),
+    #[fail(display = "Invalid CPF number.")]
     InvalidNumber,
 }
 
 /// A valid CPF/ICN number. Parsing recognizes numbers with or without separators (dot, minus,
 /// slash, and space).
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct Cpf {
     numbers: [u8; 11],
 }
@@ -86,8 +89,8 @@ impl FromStr for Cpf {
         let mut chars = s.chars();
         let first_number = match chars.next() {
             Some(c) => match c {
-                c @ '0'...'9' => c.to_digit(10).unwrap() as u8,
-                _ => return Err(ParseCpfError::InvalidDigit),
+                '0'...'9' => c.to_digit(10).unwrap() as u8,
+                _ => return Err(ParseCpfError::InvalidDigit(c)),
             },
             None => return Err(ParseCpfError::Empty),
         };
@@ -102,7 +105,7 @@ impl FromStr for Cpf {
                     i += 1;
                 }
                 '.' | '-' | '/' | ' ' => continue,
-                _ => return Err(ParseCpfError::InvalidDigit),
+                _ => return Err(ParseCpfError::InvalidDigit(c)),
             };
         }
 
@@ -208,12 +211,12 @@ mod tests {
         assert_eq!(a, b);
         assert_eq!(a, c);
         assert_eq!(a, d);
-        assert_eq!("".parse::<Cpf>(), Err(ParseCpfError::Empty));
-        assert_eq!(
+        matches!("".parse::<Cpf>(), Err(ParseCpfError::Empty));
+        matches!(
             "123;456;789/09".parse::<Cpf>(),
-            Err(ParseCpfError::InvalidDigit)
+            Err(ParseCpfError::InvalidDigit(_))
         );
-        assert_eq!(
+        matches!(
             "123.456.789-10".parse::<Cpf>(),
             Err(ParseCpfError::InvalidNumber)
         );
