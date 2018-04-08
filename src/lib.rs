@@ -101,5 +101,5 @@ mod cpf;
 mod cnpj;
 
 pub use cpf::Cpf;
-pub use cpf::Cpf as Icn;
+pub type Icn = Cpf;
 pub use cnpj::Cnpj;
