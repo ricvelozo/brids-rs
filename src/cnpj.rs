@@ -97,10 +97,8 @@ impl FromStr for Cnpj {
         // Must start with a number
         let mut chars = s.chars();
         let first_number = match chars.next() {
-            Some(c) => match c {
-                '0'...'9' => c.to_digit(10).unwrap() as u8,
-                _ => return Err(ParseCnpjError::InvalidCharacter(c, 0)),
-            },
+            Some(c @ '0'...'9') => c.to_digit(10).unwrap() as u8,
+            Some(c) => return Err(ParseCnpjError::InvalidCharacter(c, 0)),
             None => return Err(ParseCnpjError::Empty),
         };
         numbers[0] = first_number;
