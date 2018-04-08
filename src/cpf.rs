@@ -177,7 +177,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_as_bytes() {
+    fn as_bytes() {
         let a: [u8; 11] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9];
         let b = Cpf {
             numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
@@ -188,7 +188,7 @@ mod tests {
 
     #[cfg(feature = "random")]
     #[test]
-    fn test_generate() {
+    fn generate() {
         let a = Cpf::generate();
         let b = a.to_string().parse::<Cpf>().unwrap();
 
@@ -196,7 +196,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cpf_debug() {
+    fn debug() {
         let a = "Cpf(\"123.456.789-09\")";
         let b = Cpf {
             numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
@@ -206,7 +206,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cpf_display() {
+    fn display() {
         let a = "123.456.789-09";
         let b = Cpf {
             numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
@@ -216,7 +216,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cpf_from_str() {
+    fn from_str() {
         let a = "123.456.789-09".parse::<Cpf>().unwrap();
         let b = "123.456.789/09".parse::<Cpf>().unwrap();
         let c = "12345678909".parse::<Cpf>().unwrap();

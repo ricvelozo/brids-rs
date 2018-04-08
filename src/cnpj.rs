@@ -181,7 +181,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_as_bytes() {
+    fn as_bytes() {
         let a: [u8; 14] = [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5];
         let b = Cnpj {
             numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
@@ -192,7 +192,7 @@ mod tests {
 
     #[cfg(feature = "random")]
     #[test]
-    fn test_generate() {
+    fn generate() {
         let a = Cnpj::generate();
         let b = a.to_string().parse::<Cnpj>().unwrap();
 
@@ -200,7 +200,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cnpj_debug() {
+    fn debug() {
         let a = "Cnpj(\"12.345.678/0001-95\")";
         let b = Cnpj {
             numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
@@ -210,7 +210,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cnpj_display() {
+    fn display() {
         let a = "12.345.678/0001-95";
         let b = Cnpj {
             numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
@@ -220,7 +220,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cnpj_from_str() {
+    fn from_str() {
         let a = "12.345.678/0001-95".parse::<Cnpj>().unwrap();
         let b = "12345678000195".parse::<Cnpj>().unwrap();
         let c = "12 345 678 0001 95".parse::<Cnpj>().unwrap();
