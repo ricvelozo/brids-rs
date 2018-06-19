@@ -67,7 +67,7 @@ impl Cnpj {
 
 impl fmt::Debug for Cnpj {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Cnpj(\"{}\")", self.to_string())
+        write!(f, "Cnpj(\"{}\")", self)
     }
 }
 
