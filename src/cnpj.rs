@@ -108,8 +108,12 @@ impl FromStr for Cnpj {
         for (offset, c) in chars.enumerate() {
             match c {
                 '0'...'9' => {
-                    numbers[i + 1] = c.to_digit(10).unwrap() as u8;
-                    i += 1;
+                    if i < 13 {
+                        numbers[i + 1] = c.to_digit(10).unwrap() as u8;
+                        i += 1;
+                    } else {
+                        return Err(ParseCnpjError::InvalidNumber);
+                    }
                 }
                 '.' | '-' | '/' | ' ' => continue,
                 _ => return Err(ParseCnpjError::InvalidCharacter(c, offset + 1)),
@@ -234,6 +238,10 @@ mod tests {
         );
         matches!(
             "12.345.678/0001-96".parse::<Cnpj>(),
+            Err(ParseCnpjError::InvalidNumber)
+        );
+        matches!(
+            "12.345.678/0001-995".parse::<Cnpj>(),
             Err(ParseCnpjError::InvalidNumber)
         );
     }

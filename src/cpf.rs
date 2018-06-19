@@ -105,8 +105,12 @@ impl FromStr for Cpf {
         for (offset, c) in chars.enumerate() {
             match c {
                 '0'...'9' => {
-                    numbers[i + 1] = c.to_digit(10).unwrap() as u8;
-                    i += 1;
+                    if i < 10 {
+                        numbers[i + 1] = c.to_digit(10).unwrap() as u8;
+                        i += 1;
+                    } else {
+                        return Err(ParseCpfError::InvalidNumber);
+                    }
                 }
                 '.' | '-' | '/' | ' ' => continue,
                 _ => return Err(ParseCpfError::InvalidCharacter(c, offset + 1)),
@@ -232,6 +236,10 @@ mod tests {
         );
         matches!(
             "123.456.789-10".parse::<Cpf>(),
+            Err(ParseCpfError::InvalidNumber)
+        );
+        matches!(
+            "123.456.789-009".parse::<Cpf>(),
             Err(ParseCpfError::InvalidNumber)
         );
     }
