@@ -10,12 +10,13 @@
 //
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
+use failure::Fail;
 #[cfg(feature = "random")]
 use rand::{thread_rng, Rand, Rng};
 use std::{fmt, str::FromStr};
 
 /// An error which can be returned when parsing an CPF/ICN number.
-#[derive(Fail, Debug)]
+#[derive(Fail, Debug, PartialEq, Eq)]
 pub enum ParseCpfError {
     #[fail(display = "Empty string.")]
     Empty,
@@ -98,7 +99,7 @@ impl FromStr for Cpf {
         // Must start with a number
         let mut chars = s.chars();
         let first_number = match chars.next() {
-            Some(c @ '0'...'9') => c.to_digit(10).unwrap() as u8,
+            Some(c @ '0'..='9') => c.to_digit(10).unwrap() as u8,
             Some(c) => return Err(ParseCpfError::InvalidCharacter(c, 0)),
             None => return Err(ParseCpfError::Empty),
         };
@@ -108,7 +109,7 @@ impl FromStr for Cpf {
         let mut i = 0;
         for (offset, c) in chars.enumerate() {
             match c {
-                '0'...'9' => {
+                '0'..='9' => {
                     if i < 10 {
                         numbers[i + 1] = c.to_digit(10).unwrap() as u8;
                         i += 1;
@@ -135,7 +136,9 @@ impl FromStr for Cpf {
                 // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
                 .zip((2..11 + i).rev())
                 .map(|(&n, x)| n as u32 * x as u32)
-                .sum::<u32>() * 10 % 11;
+                .sum::<u32>()
+                * 10
+                % 11;
 
             if remainder == 10 || remainder == 11 {
                 remainder = 0;
@@ -233,16 +236,16 @@ mod tests {
         assert_eq!(a, b);
         assert_eq!(a, c);
         assert_eq!(a, d);
-        matches!("".parse::<Cpf>(), Err(ParseCpfError::Empty));
-        matches!(
+        assert_eq!("".parse::<Cpf>(), Err(ParseCpfError::Empty));
+        assert_eq!(
             "123;456;789/09".parse::<Cpf>(),
-            Err(ParseCpfError::InvalidCharacter(_, _))
+            Err(ParseCpfError::InvalidCharacter(';', 3))
         );
-        matches!(
+        assert_eq!(
             "123.456.789-10".parse::<Cpf>(),
             Err(ParseCpfError::InvalidNumber)
         );
-        matches!(
+        assert_eq!(
             "123.456.789-009".parse::<Cpf>(),
             Err(ParseCpfError::InvalidNumber)
         );

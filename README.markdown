@@ -4,17 +4,11 @@ Parse and generate random CPF/ICN and CNPJ, Brazil's ID numbers.
 
 ## Usage
 
-First, add the following to your `Cargo.toml`:
+Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
 brids = "0.3"
-```
-
-Next, add this to your crate root:
-
-```rust
-extern crate brids;
 ```
 
 ## Examples
@@ -22,8 +16,6 @@ extern crate brids;
 Parse and format:
 
 ```rust
-extern crate brids;
-
 use brids::Cpf;
 use std::io::{stdin, stdout, Write};
 
@@ -44,8 +36,6 @@ fn main() {
 Generate random CNPJ and CPF/ICN numbers:
 
 ```rust
-extern crate brids;
-
 use brids::{Cnpj, Cpf};
 
 fn main() {

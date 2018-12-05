@@ -14,17 +14,11 @@
 //!
 //! # Usage
 //!
-//! First, add the following to your `Cargo.toml`:
+//! Add the following to your `Cargo.toml`:
 //!
 //! ```toml
 //! [dependencies]
 //! brids = "0.3"
-//! ```
-//!
-//! Next, add this to your crate root:
-//!
-//! ```rust
-//! extern crate brids;
 //! ```
 //!
 //! # Dependencies
@@ -43,8 +37,6 @@
 //! Parse and format:
 //!
 //! ```rust
-//! extern crate brids;
-//!
 //! use brids::Cpf;
 //! use std::io::{stdin, stdout, Write};
 //!
@@ -65,8 +57,6 @@
 //! Generate random CNPJ and CPF/ICN numbers:
 //!
 //! ```rust
-//! extern crate brids;
-//!
 //! use brids::{Cnpj, Cpf};
 //!
 //! fn main() {
@@ -78,9 +68,6 @@
 //! Using a different generator:
 //!
 //! ```rust
-//! extern crate brids;
-//! extern crate rand;
-//!
 //! use brids::{Cnpj, Cpf};
 //! use rand::{ChaChaRng, Rng};
 //!
@@ -91,19 +78,9 @@
 //! }
 //! ```
 
-#[macro_use]
-extern crate failure;
-
-#[cfg(feature = "random")]
-extern crate rand;
-
-#[cfg(test)]
-#[macro_use]
-extern crate matches;
-
-mod cpf;
 mod cnpj;
+mod cpf;
 
-pub use cpf::*;
+pub use crate::cpf::*;
 pub type Icn = Cpf;
-pub use cnpj::*;
+pub use crate::cnpj::*;

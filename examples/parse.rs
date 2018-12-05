@@ -10,8 +10,6 @@
 //
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
-extern crate brids;
-
 use brids::Cpf;
 use std::io::{stdin, stdout, Write};
 
