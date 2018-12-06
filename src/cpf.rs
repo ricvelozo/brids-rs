@@ -12,7 +12,10 @@
 
 use failure::Fail;
 #[cfg(feature = "random")]
-use rand::{thread_rng, Rand, Rng};
+use rand::{
+    distributions::{Distribution, Standard},
+    thread_rng, Rng,
+};
 use std::{fmt, str::FromStr};
 
 /// An error which can be returned when parsing an CPF/ICN number.
@@ -154,9 +157,9 @@ impl FromStr for Cpf {
 }
 
 #[cfg(feature = "random")]
-impl Rand for Cpf {
+impl Distribution<Cpf> for Standard {
     #[inline]
-    fn rand<R: Rng>(rng: &mut R) -> Self {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cpf {
         let mut numbers = [0; 11];
         for number in numbers.iter_mut().take(9) {
             *number = rng.gen_range(0, 9);
@@ -170,7 +173,9 @@ impl Rand for Cpf {
                 // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
                 .zip((2..11 + i).rev())
                 .map(|(&n, x)| n as u32 * x as u32)
-                .sum::<u32>() * 10 % 11;
+                .sum::<u32>()
+                * 10
+                % 11;
 
             if check_digit == 10 || check_digit == 11 {
                 check_digit = 0;
@@ -179,7 +184,7 @@ impl Rand for Cpf {
             numbers[9 + i] = check_digit as u8;
         }
 
-        Self { numbers }
+        Cpf { numbers }
     }
 }
 

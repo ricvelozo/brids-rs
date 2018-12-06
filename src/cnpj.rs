@@ -12,7 +12,10 @@
 
 use failure::Fail;
 #[cfg(feature = "random")]
-use rand::{thread_rng, Rand, Rng};
+use rand::{
+    distributions::{Distribution, Standard},
+    thread_rng, Rng,
+};
 use std::{fmt, str::FromStr};
 
 /// An error which can be returned when parsing an CNPJ number.
@@ -157,9 +160,9 @@ impl FromStr for Cnpj {
 }
 
 #[cfg(feature = "random")]
-impl Rand for Cnpj {
+impl Distribution<Cnpj> for Standard {
     #[inline]
-    fn rand<R: Rng>(rng: &mut R) -> Self {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cnpj {
         let mut numbers = [0; 14];
         for number in numbers.iter_mut().take(8) {
             *number = rng.gen_range(0, 9);
@@ -174,7 +177,9 @@ impl Rand for Cnpj {
                 // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
                 .zip((2..10).chain(2..6 + i).rev())
                 .map(|(&n, x)| n as u32 * x as u32)
-                .sum::<u32>() * 10 % 11;
+                .sum::<u32>()
+                * 10
+                % 11;
 
             if check_digit == 10 || check_digit == 11 {
                 check_digit = 0;
@@ -183,7 +188,7 @@ impl Rand for Cnpj {
             numbers[12 + i] = check_digit as u8;
         }
 
-        Self { numbers }
+        Cnpj { numbers }
     }
 }
 
