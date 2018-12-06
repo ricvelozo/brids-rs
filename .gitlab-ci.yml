@@ -10,7 +10,7 @@ rust-latest:
 
 rust-beta:
   stage: build
-  image: rustlang/rust:beta
+  image: rustdocker/rust:beta
   script:
     - cargo build --verbose
     - cargo test --verbose
