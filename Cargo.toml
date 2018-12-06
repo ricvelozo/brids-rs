@@ -14,6 +14,7 @@ categories = ["parser-implementations", "value-formatting"]
 readme = "README.markdown"
 
 [badges]
+gitlab = { repository = "ricvelozo/brids-rs" }
 travis-ci = { repository = "ricvelozo/brids-rs" }
 
 [features]
