@@ -130,15 +130,15 @@ impl FromStr for Cpf {
             return Err(ParseCpfError::InvalidNumber);
         }
 
-        for i in 0..2 {
+        for i in 0..=1 {
             let check_digit = numbers[9 + i];
             let mut remainder = numbers
                 .iter()
                 // Includes the first check digit in the second iteration
                 .take(9 + i)
                 // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
-                .zip((2..11 + i).rev())
-                .map(|(&n, x)| n as u32 * x as u32)
+                .zip((2..=10 + i).rev())
+                .map(|(&n, x)| u32::from(n) * x as u32)
                 .sum::<u32>()
                 * 10
                 % 11;
@@ -147,7 +147,7 @@ impl FromStr for Cpf {
                 remainder = 0;
             }
 
-            if remainder != check_digit as u32 {
+            if remainder != u32::from(check_digit) {
                 return Err(ParseCpfError::InvalidNumber);
             }
         }
@@ -165,14 +165,14 @@ impl Distribution<Cpf> for Standard {
             *number = rng.gen_range(0, 9);
         }
 
-        for i in 0..2 {
+        for i in 0..=1 {
             let mut check_digit = numbers
                 .iter()
                 // Includes the first check digit in the second iteration
                 .take(9 + i)
                 // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
-                .zip((2..11 + i).rev())
-                .map(|(&n, x)| n as u32 * x as u32)
+                .zip((2..=10 + i).rev())
+                .map(|(&n, x)| u32::from(n) * x as u32)
                 .sum::<u32>()
                 * 10
                 % 11;
@@ -213,7 +213,7 @@ mod tests {
 
     #[test]
     fn debug() {
-        let a = "Cpf(\"123.456.789-09\")";
+        let a = r#"Cpf("123.456.789-09")"#;
         let b = Cpf {
             numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
         };

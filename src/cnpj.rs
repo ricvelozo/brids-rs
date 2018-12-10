@@ -133,15 +133,15 @@ impl FromStr for Cnpj {
             return Err(ParseCnpjError::InvalidNumber);
         }
 
-        for i in 0..2 {
+        for i in 0..=1 {
             let check_digit = numbers[12 + i];
             let mut remainder = numbers
                 .iter()
                 // Includes the first check digit in the second iteration
                 .take(12 + i)
                 // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
-                .zip((2..10).chain(2..6 + i).rev())
-                .map(|(&n, x)| n as u32 * x as u32)
+                .zip((2..=9).chain(2..=5 + i).rev())
+                .map(|(&n, x)| u32::from(n) * x as u32)
                 .sum::<u32>()
                 * 10
                 % 11;
@@ -150,7 +150,7 @@ impl FromStr for Cnpj {
                 remainder = 0;
             }
 
-            if remainder != check_digit as u32 {
+            if remainder != u32::from(check_digit) {
                 return Err(ParseCnpjError::InvalidNumber);
             }
         }
@@ -169,14 +169,14 @@ impl Distribution<Cnpj> for Standard {
         }
         numbers[11] = 1; // Company headquarters
 
-        for i in 0..2 {
+        for i in 0..=1 {
             let mut check_digit = numbers
                 .iter()
                 // Includes the first check digit in the second iteration
                 .take(12 + i)
                 // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
-                .zip((2..10).chain(2..6 + i).rev())
-                .map(|(&n, x)| n as u32 * x as u32)
+                .zip((2..=9).chain(2..=5 + i).rev())
+                .map(|(&n, x)| u32::from(n) * x as u32)
                 .sum::<u32>()
                 * 10
                 % 11;
@@ -217,7 +217,7 @@ mod tests {
 
     #[test]
     fn debug() {
-        let a = "Cnpj(\"12.345.678/0001-95\")";
+        let a = r#"Cnpj("12.345.678/0001-95")"#;
         let b = Cnpj {
             numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
         };

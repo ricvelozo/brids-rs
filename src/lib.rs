@@ -78,6 +78,8 @@
 //! }
 //! ```
 
+#![warn(clippy::all)]
+
 mod cnpj;
 mod cpf;
 
