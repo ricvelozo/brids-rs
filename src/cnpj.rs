@@ -52,6 +52,24 @@ impl Cnpj {
         &self.numbers
     }
 
+    /// Returns the entity branch.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use brids::Cnpj;
+    ///
+    /// let branch = Cnpj::generate().branch();
+    /// ```
+    pub fn branch(&self) -> u16 {
+        self.numbers[8..=11]
+            .iter()
+            .rev()
+            .enumerate()
+            .map(|(i, &x)| u16::from(x) * 10u16.pow(i as u32))
+            .sum::<u16>()
+    }
+
     /// Generates a random number, using [`rand::thread_rng`][rand] (optional dependency enabled
     /// by default). To use a different generator, instantiate the generator directly.
     ///
@@ -211,6 +229,14 @@ mod tests {
         };
 
         assert_eq!(&a, b.as_bytes());
+    }
+
+    #[test]
+    fn branch() {
+        let cnpj = Cnpj {
+            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 2, 7, 2, 4],
+        };
+        assert_eq!(27, cnpj.branch());
     }
 
     #[test]
