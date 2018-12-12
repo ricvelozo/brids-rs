@@ -136,7 +136,7 @@ impl FromStr for Cnpj {
         }
 
         // Checks for repeated numbers
-        if numbers.iter().all(|&c| c == first_number) {
+        if numbers.iter().all(|&x| x == first_number) {
             return Err(ParseCnpjError::InvalidNumber);
         }
 
@@ -148,7 +148,7 @@ impl FromStr for Cnpj {
                 .take(12 + i)
                 // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
                 .zip((2..=9).chain(2..=5 + i).rev())
-                .map(|(&n, x)| u32::from(n) * x as u32)
+                .map(|(&x, y)| u32::from(x) * y as u32)
                 .sum::<u32>()
                 * 10
                 % 11;
@@ -183,7 +183,7 @@ impl Distribution<Cnpj> for Standard {
                 .take(12 + i)
                 // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
                 .zip((2..=9).chain(2..=5 + i).rev())
-                .map(|(&n, x)| u32::from(n) * x as u32)
+                .map(|(&x, y)| u32::from(x) * y as u32)
                 .sum::<u32>()
                 * 10
                 % 11;

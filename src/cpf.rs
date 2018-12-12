@@ -133,7 +133,7 @@ impl FromStr for Cpf {
         }
 
         // Checks for repeated numbers
-        if numbers.iter().all(|&c| c == first_number) {
+        if numbers.iter().all(|&x| x == first_number) {
             return Err(ParseCpfError::InvalidNumber);
         }
 
@@ -145,7 +145,7 @@ impl FromStr for Cpf {
                 .take(9 + i)
                 // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
                 .zip((2..=10 + i).rev())
-                .map(|(&n, x)| u32::from(n) * x as u32)
+                .map(|(&x, y)| u32::from(x) * y as u32)
                 .sum::<u32>()
                 * 10
                 % 11;
@@ -179,7 +179,7 @@ impl Distribution<Cpf> for Standard {
                 .take(9 + i)
                 // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
                 .zip((2..=10 + i).rev())
-                .map(|(&n, x)| u32::from(n) * x as u32)
+                .map(|(&x, y)| u32::from(x) * y as u32)
                 .sum::<u32>()
                 * 10
                 % 11;
