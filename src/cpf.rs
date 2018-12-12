@@ -48,7 +48,7 @@ impl Cpf {
     /// let bytes = cpf.as_bytes();
     /// ```
     #[inline]
-    pub fn as_bytes(&self) -> &[u8] {
+    pub fn as_bytes(&self) -> &[u8; 11] {
         &self.numbers
     }
 
@@ -70,6 +70,13 @@ impl Cpf {
     #[inline]
     pub fn generate() -> Self {
         thread_rng().gen()
+    }
+}
+
+impl AsRef<[u8]> for Cpf {
+    #[inline]
+    fn as_ref(&self) -> &[u8] {
+        self.as_bytes()
     }
 }
 
@@ -199,7 +206,21 @@ mod tests {
             numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
         };
 
-        assert_eq!(a, *b.as_bytes());
+        assert_eq!(&a, b.as_bytes());
+    }
+
+    #[test]
+    fn as_ref() {
+        fn test_trait<T: AsRef<[u8]>>(b: T) {
+            let a: [u8; 11] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9];
+            assert_eq!(&a, b.as_ref());
+        }
+
+        let b = Cpf {
+            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
+        };
+
+        test_trait(b);
     }
 
     #[cfg(feature = "random")]
