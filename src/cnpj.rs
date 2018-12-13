@@ -31,7 +31,7 @@ pub enum ParseCnpjError {
 
 /// A valid CNPJ number. Parsing recognizes numbers with or without separators (dot, minus, slash,
 /// and space).
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Cnpj {
     numbers: [u8; 14],
 }
@@ -239,6 +239,15 @@ mod tests {
         assert_eq!(27, cnpj.branch());
     }
 
+    #[cfg(feature = "random")]
+    #[test]
+    fn generate() {
+        let a = Cnpj::generate();
+        let b = a.to_string().parse::<Cnpj>().unwrap();
+
+        assert_eq!(a, b);
+    }
+
     #[test]
     fn as_ref() {
         fn test_trait<T: AsRef<[u8]>>(b: T) {
@@ -253,13 +262,16 @@ mod tests {
         test_trait(b);
     }
 
-    #[cfg(feature = "random")]
     #[test]
-    fn generate() {
-        let a = Cnpj::generate();
-        let b = a.to_string().parse::<Cnpj>().unwrap();
+    fn cmp() {
+        let a = Cnpj {
+            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
+        };
+        let b = Cnpj {
+            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 2, 7, 2, 4],
+        };
 
-        assert_eq!(a, b);
+        assert!(a < b);
     }
 
     #[test]
