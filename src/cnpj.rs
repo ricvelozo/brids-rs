@@ -21,7 +21,7 @@ use std::{fmt, str::FromStr};
 /// An error which can be returned when parsing an CNPJ number.
 #[derive(Fail, Debug, PartialEq, Eq)]
 pub enum ParseCnpjError {
-    #[fail(display = "Empty string.")]
+    #[fail(display = "Empty.")]
     Empty,
     #[fail(display = "Invalid character `{}` at offset {}.", _0, _1)]
     InvalidCharacter(char, usize),
@@ -37,6 +37,92 @@ pub struct Cnpj {
 }
 
 impl Cnpj {
+    /// Parses a byte slice of numbers as an CNPJ, guessing the missing parts.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```rust
+    /// use brids::Cnpj;
+    ///
+    /// match Cnpj::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]) {
+    ///     Ok(cnpj) => println!("{} is a valid number.", cnpj),
+    ///     Err(err) => println!("Error: {}", err),
+    /// }
+    /// ```
+    ///
+    /// Guess the check digits:
+    ///
+    /// ```rust
+    /// use brids::Cnpj;
+    ///
+    /// match Cnpj::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 2, 7]) {
+    ///     Ok(cnpj) => println!("{} is a valid number.", cnpj),
+    ///     Err(err) => println!("Error: {}", err),
+    /// }
+    /// ```
+    ///
+    /// Guess the branch and check digits:
+    ///
+    /// ```rust
+    /// use brids::Cnpj;
+    ///
+    /// match Cnpj::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8]) {
+    ///     Ok(cnpj) => println!("{} is a valid number.", cnpj),
+    ///     Err(err) => println!("Error: {}", err),
+    /// }
+    /// ```
+    pub fn from_slice(slice: &[u8]) -> Result<Self, ParseCnpjError> {
+        let mut numbers = [0; 14];
+        match slice.len() {
+            0 => return Err(ParseCnpjError::Empty),
+            8 => numbers[11] = 1, // Company headquarters
+            12 | 14 => (),
+            _ => return Err(ParseCnpjError::InvalidNumber),
+        }
+
+        let first_number = numbers[0];
+        for (y, x) in numbers.iter_mut().zip(slice.iter()) {
+            // 0..=9
+            if *x > 9 {
+                return Err(ParseCnpjError::InvalidNumber);
+            }
+            *y = *x;
+        }
+
+        // Checks for repeated numbers
+        if slice.len() == 14 && numbers.iter().all(|&x| x == first_number) {
+            return Err(ParseCnpjError::InvalidNumber);
+        }
+
+        for i in 0..=1 {
+            let check_digit = numbers[12 + i];
+            let mut remainder = numbers
+                .iter()
+                // Includes the first check digit in the second iteration
+                .take(12 + i)
+                // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
+                .zip((2..=9).chain(2..=5 + i).rev())
+                .map(|(&x, y)| u32::from(x) * y as u32)
+                .sum::<u32>()
+                * 10
+                % 11;
+
+            if remainder == 10 || remainder == 11 {
+                remainder = 0;
+            }
+
+            if slice.len() < 14 {
+                numbers[12 + i] = remainder as u8; // check digit
+            } else if remainder != u32::from(check_digit) {
+                return Err(ParseCnpjError::InvalidNumber);
+            }
+        }
+
+        Ok(Self { numbers })
+    }
+
     /// Returns a byte slice of the numbers.
     ///
     /// # Examples
@@ -78,8 +164,6 @@ impl Cnpj {
     /// [rand]: https://crates.io/crates/rand
     ///
     /// # Examples
-    ///
-    /// Basic use:
     ///
     /// ```rust
     /// use brids::Cnpj;
@@ -196,7 +280,7 @@ impl Distribution<Cnpj> for Standard {
         numbers[11] = 1; // Company headquarters
 
         for i in 0..=1 {
-            let mut check_digit = numbers
+            let mut remainder = numbers
                 .iter()
                 // Includes the first check digit in the second iteration
                 .take(12 + i)
@@ -207,11 +291,11 @@ impl Distribution<Cnpj> for Standard {
                 * 10
                 % 11;
 
-            if check_digit == 10 || check_digit == 11 {
-                check_digit = 0;
+            if remainder == 10 || remainder == 11 {
+                remainder = 0;
             }
 
-            numbers[12 + i] = check_digit as u8;
+            numbers[12 + i] = remainder as u8; // check digit
         }
 
         Cnpj { numbers }
@@ -221,6 +305,25 @@ impl Distribution<Cnpj> for Standard {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn from_slice() {
+        let a = Cnpj {
+            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
+        };
+        let b = Cnpj {
+            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 2, 7, 2, 4],
+        };
+        let c: [u8; 14] = [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5];
+        let d: [u8; 12] = [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1];
+        let e: [u8; 8] = [1, 2, 3, 4, 5, 6, 7, 8];
+        let f: [u8; 12] = [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 2, 7];
+
+        assert_eq!(a, Cnpj::from_slice(&c).unwrap());
+        assert_eq!(a, Cnpj::from_slice(&d).unwrap());
+        assert_eq!(a, Cnpj::from_slice(&e).unwrap());
+        assert_eq!(b, Cnpj::from_slice(&f).unwrap());
+    }
 
     #[test]
     fn as_bytes() {

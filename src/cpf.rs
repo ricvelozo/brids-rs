@@ -21,7 +21,7 @@ use std::{fmt, str::FromStr};
 /// An error which can be returned when parsing an CPF/ICN number.
 #[derive(Fail, Debug, PartialEq, Eq)]
 pub enum ParseCpfError {
-    #[fail(display = "Empty string.")]
+    #[fail(display = "Empty.")]
     Empty,
     #[fail(display = "Invalid character `{}` at offset {}.", _0, _1)]
     InvalidCharacter(char, usize),
@@ -37,6 +37,80 @@ pub struct Cpf {
 }
 
 impl Cpf {
+    /// Parses a byte slice of numbers as an CPF, guessing the missing parts.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```rust
+    /// use brids::Cpf;
+    ///
+    /// match Cpf::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]) {
+    ///     Ok(cpf) => println!("{} is a valid number.", cpf),
+    ///     Err(err) => println!("Error: {}", err),
+    /// }
+    /// ```
+    ///
+    /// Guess the check digits:
+    ///
+    /// ```rust
+    /// use brids::Cpf;
+    ///
+    /// match Cpf::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+    ///     Ok(cpf) => println!("{} is a valid number.", cpf),
+    ///     Err(err) => println!("Error: {}", err),
+    /// }
+    /// ```
+    pub fn from_slice(slice: &[u8]) -> Result<Self, ParseCpfError> {
+        let mut numbers = [0; 11];
+        match slice.len() {
+            0 => return Err(ParseCpfError::Empty),
+            9 | 11 => (),
+            _ => return Err(ParseCpfError::InvalidNumber),
+        }
+
+        let first_number = numbers[0];
+        for (y, x) in numbers.iter_mut().zip(slice.iter()) {
+            // 0..=9
+            if *x > 9 {
+                return Err(ParseCpfError::InvalidNumber);
+            }
+            *y = *x;
+        }
+
+        // Checks for repeated numbers
+        if slice.len() == 11 && numbers.iter().all(|&x| x == first_number) {
+            return Err(ParseCpfError::InvalidNumber);
+        }
+
+        for i in 0..=1 {
+            let check_digit = numbers[9 + i];
+            let mut remainder = numbers
+                .iter()
+                // Includes the first check digit in the second iteration
+                .take(9 + i)
+                // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
+                .zip((2..=10 + i).rev())
+                .map(|(&x, y)| u32::from(x) * y as u32)
+                .sum::<u32>()
+                * 10
+                % 11;
+
+            if remainder == 10 || remainder == 11 {
+                remainder = 0;
+            }
+
+            if slice.len() < 11 {
+                numbers[9 + i] = remainder as u8; // check digit
+            } else if remainder != u32::from(check_digit) {
+                return Err(ParseCpfError::InvalidNumber);
+            }
+        }
+
+        Ok(Self { numbers })
+    }
+
     /// Returns a byte slice of the numbers.
     ///
     /// # Examples
@@ -58,8 +132,6 @@ impl Cpf {
     /// [rand]: https://crates.io/crates/rand
     ///
     /// # Examples
-    ///
-    /// Basic use:
     ///
     /// ```rust
     /// use brids::Cpf;
@@ -172,7 +244,7 @@ impl Distribution<Cpf> for Standard {
         }
 
         for i in 0..=1 {
-            let mut check_digit = numbers
+            let mut remainder = numbers
                 .iter()
                 // Includes the first check digit in the second iteration
                 .take(9 + i)
@@ -183,11 +255,11 @@ impl Distribution<Cpf> for Standard {
                 * 10
                 % 11;
 
-            if check_digit == 10 || check_digit == 11 {
-                check_digit = 0;
+            if remainder == 10 || remainder == 11 {
+                remainder = 0;
             }
 
-            numbers[9 + i] = check_digit as u8;
+            numbers[9 + i] = remainder as u8; // check digit
         }
 
         Cpf { numbers }
@@ -197,6 +269,18 @@ impl Distribution<Cpf> for Standard {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn from_slice() {
+        let a = Cpf {
+            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
+        };
+        let b: [u8; 11] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9];
+        let c: [u8; 9] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+        assert_eq!(a, Cpf::from_slice(&b).unwrap());
+        assert_eq!(a, Cpf::from_slice(&c).unwrap());
+    }
 
     #[test]
     fn as_bytes() {
