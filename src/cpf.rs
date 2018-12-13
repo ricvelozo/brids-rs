@@ -165,7 +165,6 @@ impl FromStr for Cpf {
 
 #[cfg(feature = "random")]
 impl Distribution<Cpf> for Standard {
-    #[inline]
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cpf {
         let mut numbers = [0; 11];
         for number in numbers.iter_mut().take(9) {

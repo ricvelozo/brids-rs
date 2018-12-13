@@ -59,8 +59,10 @@ impl Cnpj {
     /// ```rust
     /// use brids::Cnpj;
     ///
-    /// let branch = Cnpj::generate().branch();
+    /// let cnpj = Cnpj::generate();
+    /// let branch = cnpj.branch();
     /// ```
+    #[inline]
     pub fn branch(&self) -> u16 {
         self.numbers[8..=11]
             .iter()
@@ -186,7 +188,6 @@ impl FromStr for Cnpj {
 
 #[cfg(feature = "random")]
 impl Distribution<Cnpj> for Standard {
-    #[inline]
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cnpj {
         let mut numbers = [0; 14];
         for number in numbers.iter_mut().take(8) {
