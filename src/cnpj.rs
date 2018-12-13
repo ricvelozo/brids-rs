@@ -11,11 +11,13 @@
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
 use failure::Fail;
-#[cfg(feature = "random")]
+#[cfg(feature = "rand")]
 use rand::{
     distributions::{Distribution, Standard},
     thread_rng, Rng,
 };
+#[cfg(feature = "serde")]
+use serde::*;
 use std::{fmt, str::FromStr};
 
 /// An error which can be returned when parsing an CNPJ number.
@@ -32,9 +34,7 @@ pub enum ParseCnpjError {
 /// A valid CNPJ number. Parsing recognizes numbers with or without separators (dot, minus, slash,
 /// and space).
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Cnpj {
-    numbers: [u8; 14],
-}
+pub struct Cnpj([u8; 14]);
 
 impl Cnpj {
     /// Parses a byte slice of numbers as an CNPJ, guessing the missing parts.
@@ -120,7 +120,7 @@ impl Cnpj {
             }
         }
 
-        Ok(Self { numbers })
+        Ok(Cnpj(numbers))
     }
 
     /// Returns a byte slice of the numbers.
@@ -135,7 +135,7 @@ impl Cnpj {
     /// ```
     #[inline]
     pub fn as_bytes(&self) -> &[u8; 14] {
-        &self.numbers
+        &self.0
     }
 
     /// Returns the entity branch.
@@ -150,7 +150,7 @@ impl Cnpj {
     /// ```
     #[inline]
     pub fn branch(&self) -> u16 {
-        self.numbers[8..=11]
+        self.0[8..=11]
             .iter()
             .rev()
             .enumerate()
@@ -170,7 +170,7 @@ impl Cnpj {
     ///
     /// let cnpj = Cnpj::generate();
     /// ```
-    #[cfg(feature = "random")]
+    #[cfg(feature = "rand")]
     #[inline]
     pub fn generate() -> Self {
         thread_rng().gen()
@@ -192,8 +192,8 @@ impl fmt::Debug for Cnpj {
 
 impl fmt::Display for Cnpj {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}{}.", self.numbers[0], self.numbers[1])?;
-        for (i, number) in self.numbers.iter().skip(2).enumerate() {
+        write!(f, "{}{}.", self.0[0], self.0[1])?;
+        for (i, number) in self.0.iter().skip(2).enumerate() {
             if i % 10 == 0 && i != 0 {
                 write!(f, "-")?;
             } else if i % 6 == 0 && i != 0 {
@@ -266,11 +266,11 @@ impl FromStr for Cnpj {
             }
         }
 
-        Ok(Self { numbers })
+        Ok(Cnpj(numbers))
     }
 }
 
-#[cfg(feature = "random")]
+#[cfg(feature = "rand")]
 impl Distribution<Cnpj> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cnpj {
         let mut numbers = [0; 14];
@@ -298,7 +298,61 @@ impl Distribution<Cnpj> for Standard {
             numbers[12 + i] = remainder as u8; // check digit
         }
 
-        Cnpj { numbers }
+        Cnpj(numbers)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Cnpj {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        if serializer.is_human_readable() {
+            serializer.serialize_str(&self.to_string())
+        } else {
+            serializer.serialize_bytes(self.as_bytes())
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Cnpj {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        if deserializer.is_human_readable() {
+            struct CnpjStringVisitor;
+
+            impl<'vi> de::Visitor<'vi> for CnpjStringVisitor {
+                type Value = Cnpj;
+
+                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    write!(formatter, "a CNPJ string")
+                }
+
+                fn visit_str<E: de::Error>(self, value: &str) -> Result<Cnpj, E> {
+                    value.parse::<Cnpj>().map_err(E::custom)
+                }
+
+                fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cnpj, E> {
+                    Cnpj::from_slice(value).map_err(E::custom)
+                }
+            }
+
+            deserializer.deserialize_str(CnpjStringVisitor)
+        } else {
+            struct CnpjBytesVisitor;
+
+            impl<'vi> de::Visitor<'vi> for CnpjBytesVisitor {
+                type Value = Cnpj;
+
+                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    write!(formatter, "bytes")
+                }
+
+                fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cnpj, E> {
+                    Cnpj::from_slice(value).map_err(E::custom)
+                }
+            }
+
+            deserializer.deserialize_bytes(CnpjBytesVisitor)
+        }
     }
 }
 
@@ -308,12 +362,8 @@ mod tests {
 
     #[test]
     fn from_slice() {
-        let a = Cnpj {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
-        };
-        let b = Cnpj {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 2, 7, 2, 4],
-        };
+        let a = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]);
+        let b = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 2, 7, 2, 4]);
         let c: [u8; 14] = [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5];
         let d: [u8; 12] = [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1];
         let e: [u8; 8] = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -328,22 +378,18 @@ mod tests {
     #[test]
     fn as_bytes() {
         let a: [u8; 14] = [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5];
-        let b = Cnpj {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
-        };
+        let b = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]);
 
         assert_eq!(&a, b.as_bytes());
     }
 
     #[test]
     fn branch() {
-        let cnpj = Cnpj {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 2, 7, 2, 4],
-        };
+        let cnpj = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 2, 7, 2, 4]);
         assert_eq!(27, cnpj.branch());
     }
 
-    #[cfg(feature = "random")]
+    #[cfg(feature = "rand")]
     #[test]
     fn generate() {
         let a = Cnpj::generate();
@@ -359,21 +405,15 @@ mod tests {
             assert_eq!(&a, b.as_ref());
         }
 
-        let b = Cnpj {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
-        };
+        let b = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]);
 
         test_trait(b);
     }
 
     #[test]
     fn cmp() {
-        let a = Cnpj {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
-        };
-        let b = Cnpj {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 2, 7, 2, 4],
-        };
+        let a = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]);
+        let b = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 2, 7, 2, 4]);
 
         assert!(a < b);
     }
@@ -381,9 +421,7 @@ mod tests {
     #[test]
     fn debug() {
         let a = r#"Cnpj("12.345.678/0001-95")"#;
-        let b = Cnpj {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
-        };
+        let b = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]);
 
         assert_eq!(a, format!("{:?}", b));
     }
@@ -391,9 +429,7 @@ mod tests {
     #[test]
     fn display() {
         let a = "12.345.678/0001-95";
-        let b = Cnpj {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5],
-        };
+        let b = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]);
 
         assert_eq!(a, format!("{}", b));
     }

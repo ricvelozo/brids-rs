@@ -11,11 +11,13 @@
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
 use failure::Fail;
-#[cfg(feature = "random")]
+#[cfg(feature = "rand")]
 use rand::{
     distributions::{Distribution, Standard},
     thread_rng, Rng,
 };
+#[cfg(feature = "serde")]
+use serde::*;
 use std::{fmt, str::FromStr};
 
 /// An error which can be returned when parsing an CPF/ICN number.
@@ -32,9 +34,7 @@ pub enum ParseCpfError {
 /// A valid CPF/ICN number. Parsing recognizes numbers with or without separators (dot, minus,
 /// slash, and space).
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Cpf {
-    numbers: [u8; 11],
-}
+pub struct Cpf([u8; 11]);
 
 impl Cpf {
     /// Parses a byte slice of numbers as an CPF, guessing the missing parts.
@@ -108,7 +108,7 @@ impl Cpf {
             }
         }
 
-        Ok(Self { numbers })
+        Ok(Cpf(numbers))
     }
 
     /// Returns a byte slice of the numbers.
@@ -123,7 +123,7 @@ impl Cpf {
     /// ```
     #[inline]
     pub fn as_bytes(&self) -> &[u8; 11] {
-        &self.numbers
+        &self.0
     }
 
     /// Generates a random number, using [`rand::thread_rng`][rand] (optional dependency enabled
@@ -138,7 +138,7 @@ impl Cpf {
     ///
     /// let cpf = Cpf::generate();
     /// ```
-    #[cfg(feature = "random")]
+    #[cfg(feature = "rand")]
     #[inline]
     pub fn generate() -> Self {
         thread_rng().gen()
@@ -160,7 +160,7 @@ impl fmt::Debug for Cpf {
 
 impl fmt::Display for Cpf {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for (i, number) in self.numbers.iter().enumerate() {
+        for (i, number) in self.0.iter().enumerate() {
             if i % 9 == 0 && i != 0 {
                 write!(f, "-")?;
             } else if i % 3 == 0 && i != 0 {
@@ -231,11 +231,11 @@ impl FromStr for Cpf {
             }
         }
 
-        Ok(Self { numbers })
+        Ok(Cpf(numbers))
     }
 }
 
-#[cfg(feature = "random")]
+#[cfg(feature = "rand")]
 impl Distribution<Cpf> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cpf {
         let mut numbers = [0; 11];
@@ -262,7 +262,61 @@ impl Distribution<Cpf> for Standard {
             numbers[9 + i] = remainder as u8; // check digit
         }
 
-        Cpf { numbers }
+        Cpf(numbers)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Cpf {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        if serializer.is_human_readable() {
+            serializer.serialize_str(&self.to_string())
+        } else {
+            serializer.serialize_bytes(self.as_bytes())
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Cpf {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        if deserializer.is_human_readable() {
+            struct CpfStringVisitor;
+
+            impl<'vi> de::Visitor<'vi> for CpfStringVisitor {
+                type Value = Cpf;
+
+                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    write!(formatter, "a CPF string")
+                }
+
+                fn visit_str<E: de::Error>(self, value: &str) -> Result<Cpf, E> {
+                    value.parse::<Cpf>().map_err(E::custom)
+                }
+
+                fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cpf, E> {
+                    Cpf::from_slice(value).map_err(E::custom)
+                }
+            }
+
+            deserializer.deserialize_str(CpfStringVisitor)
+        } else {
+            struct CpfBytesVisitor;
+
+            impl<'vi> de::Visitor<'vi> for CpfBytesVisitor {
+                type Value = Cpf;
+
+                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    write!(formatter, "bytes")
+                }
+
+                fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cpf, E> {
+                    Cpf::from_slice(value).map_err(E::custom)
+                }
+            }
+
+            deserializer.deserialize_bytes(CpfBytesVisitor)
+        }
     }
 }
 
@@ -272,9 +326,7 @@ mod tests {
 
     #[test]
     fn from_slice() {
-        let a = Cpf {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
-        };
+        let a = Cpf([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]);
         let b: [u8; 11] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9];
         let c: [u8; 9] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -285,14 +337,12 @@ mod tests {
     #[test]
     fn as_bytes() {
         let a: [u8; 11] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9];
-        let b = Cpf {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
-        };
+        let b = Cpf([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]);
 
         assert_eq!(&a, b.as_bytes());
     }
 
-    #[cfg(feature = "random")]
+    #[cfg(feature = "rand")]
     #[test]
     fn generate() {
         let a = Cpf::generate();
@@ -308,21 +358,15 @@ mod tests {
             assert_eq!(&a, b.as_ref());
         }
 
-        let b = Cpf {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
-        };
+        let b = Cpf([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]);
 
         test_trait(b);
     }
 
     #[test]
     fn cmp() {
-        let a = Cpf {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
-        };
-        let b = Cpf {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 9, 0, 3, 4],
-        };
+        let a = Cpf([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]);
+        let b = Cpf([1, 2, 3, 4, 5, 6, 7, 9, 0, 3, 4]);
 
         assert!(a < b);
     }
@@ -330,9 +374,7 @@ mod tests {
     #[test]
     fn debug() {
         let a = r#"Cpf("123.456.789-09")"#;
-        let b = Cpf {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
-        };
+        let b = Cpf([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]);
 
         assert_eq!(a, format!("{:?}", b));
     }
@@ -340,9 +382,7 @@ mod tests {
     #[test]
     fn display() {
         let a = "123.456.789-09";
-        let b = Cpf {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9],
-        };
+        let b = Cpf([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]);
 
         assert_eq!(a, format!("{}", b));
     }

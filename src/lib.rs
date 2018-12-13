@@ -32,6 +32,15 @@
 //! brids = { version = "0.3", default-features = false }
 //! ```
 //!
+//! The [serde] crate is an optional dependency disabled by default. To enable, use like this:
+//!
+//! [serde]: https://crates.io/crates/serde
+//!
+//! ```toml
+//! [dependencies]
+//! brids = { version = "0.3", features = ["serde"] }
+//! ```
+//!
 //! # Examples
 //!
 //! Parse and format:
@@ -75,6 +84,35 @@
 //!     let mut rng = SmallRng::seed_from_u64(123);
 //!     println!("Random CNPJ number: {}", rng.gen::<Cnpj>());
 //!     println!("Random CPF/ICN number: {}", rng.gen::<Cpf>());
+//! }
+//! ```
+//!
+//! Serialize and deserialize (you must enable the [`serde` feature](#dependencies)):
+//!
+//! ```rust, ignore
+//! use brids::Cnpj;
+//! use serde_derive::{Deserialize, Serialize};
+//! use serde_json;
+//!
+//! #[derive(Debug, PartialEq, Serialize, Deserialize)]
+//! struct Company<'a> {
+//!     name: &'a str,
+//!     cnpj: Cnpj,
+//! }
+//!
+//! fn main() {
+//!     let company1 = Company {
+//!         name: "ACME",
+//!         cnpj: Cnpj::generate(),
+//!     };
+//!
+//!     // Serializes the struct into JSON
+//!     let json = serde_json::to_string(&company1).unwrap();
+//!     println!("{}", json);
+//!
+//!     // Deserializes the struct back
+//!     let company2: Company = serde_json::from_str(&json).unwrap();
+//!     assert_eq!(company1, company2);
 //! }
 //! ```
 
