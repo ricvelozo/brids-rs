@@ -23,18 +23,18 @@
 //!
 //! # Dependencies
 //!
-//! The [rand] crate is an optional dependency enabled by default. To disable, use like this:
+//! The [`rand`] crate is an optional dependency enabled by default. To disable, use:
 //!
-//! [rand]: https://crates.io/crates/rand
+//! [`rand`]: https://crates.io/crates/rand
 //!
 //! ```toml
 //! [dependencies]
 //! brids = { version = "0.3", default-features = false }
 //! ```
 //!
-//! The [serde] crate is an optional dependency disabled by default. To enable, use like this:
+//! The [`serde`] crate is an optional dependency **disabled by default**. To enable, use:
 //!
-//! [serde]: https://crates.io/crates/serde
+//! [`serde`]: https://crates.io/crates/serde
 //!
 //! ```toml
 //! [dependencies]

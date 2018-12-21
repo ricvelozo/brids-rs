@@ -126,10 +126,10 @@ impl Cpf {
         &self.0
     }
 
-    /// Generates a random number, using [`rand::thread_rng`][rand] (optional dependency enabled
-    /// by default). To use a different generator, instantiate the generator directly.
+    /// Generates a random number, using [`rand::thread_rng`] (optional dependency enabled by
+    /// default). To use a different generator, instantiate the generator directly.
     ///
-    /// [rand]: https://crates.io/crates/rand
+    /// [`rand::thread_rng`]: https://docs.rs/rand/0.6/rand/fn.thread_rng.html
     ///
     /// # Examples
     ///
