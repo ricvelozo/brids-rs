@@ -1,5 +1,17 @@
 # Releases
 
+## Version 0.4.0 (2018-12-21)
+
+* Update to Rust 2018 edition
+* Update dependencies
+* Configure GitLab CI
+* Add methods to parse from byte slices
+* Add method to get the CNPJ entity branch
+* Implement `AsRef<[u8]>`, `PartialOrd` and `Ord`
+* Turn `Cnpj` and `Cpf` structs into newtypes
+* Add support to serialization with `serde`
+* Add more examples and improve documentation
+
 ## Version 0.3.1 (2018-06-19)
 
 * Fix parsing when have too much numbers and add test
@@ -20,6 +32,7 @@
 ## Version 0.2.0 (2018-03-29)
 
 * Add CNPJ support
+* Configure Travis CI
 * Update examples, documentation and tests
 
 ## Version 0.1.0 (2018-03-28)

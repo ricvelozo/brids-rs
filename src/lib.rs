@@ -18,7 +18,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! brids = "0.3"
+//! brids = "0.4"
 //! ```
 //!
 //! # Dependencies
@@ -29,7 +29,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! brids = { version = "0.3", default-features = false }
+//! brids = { version = "0.4", default-features = false }
 //! ```
 //!
 //! The [`serde`] crate is an optional dependency **disabled by default**. To enable, use:
@@ -38,7 +38,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! brids = { version = "0.3", features = ["serde"] }
+//! brids = { version = "0.4", features = ["serde"] }
 //! ```
 //!
 //! # Examples

@@ -8,7 +8,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-brids = "0.3"
+brids = "0.4"
 ```
 
 ## Examples
