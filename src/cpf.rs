@@ -272,7 +272,7 @@ impl Serialize for Cpf {
         if serializer.is_human_readable() {
             serializer.serialize_str(&self.to_string())
         } else {
-            serializer.serialize_bytes(self.as_bytes())
+            serializer.serialize_bytes(&self.as_bytes()[..9])
         }
     }
 }
@@ -410,5 +410,25 @@ mod tests {
             "123.456.789-009".parse::<Cpf>(),
             Err(ParseCpfError::InvalidNumber)
         );
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serialize_readable() {
+        use serde_test::Configure;
+
+        let cpf_str = "123.456.789-09";
+        let cpf = Cpf::from_str(cpf_str).unwrap();
+        serde_test::assert_tokens(&cpf.readable(), &[serde_test::Token::Str(cpf_str)]);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serialize_compact() {
+        use serde_test::Configure;
+
+        let cpf_bytes = &[1, 2, 3, 4, 5, 6, 7, 8, 9];
+        let cpf = Cpf::from_slice(cpf_bytes).unwrap();
+        serde_test::assert_tokens(&cpf.compact(), &[serde_test::Token::Bytes(cpf_bytes)]);
     }
 }

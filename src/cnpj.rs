@@ -308,7 +308,7 @@ impl Serialize for Cnpj {
         if serializer.is_human_readable() {
             serializer.serialize_str(&self.to_string())
         } else {
-            serializer.serialize_bytes(self.as_bytes())
+            serializer.serialize_bytes(&self.as_bytes()[..12])
         }
     }
 }
@@ -455,5 +455,25 @@ mod tests {
             "12.345.678/0001-995".parse::<Cnpj>(),
             Err(ParseCnpjError::InvalidNumber)
         );
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serialize_readable() {
+        use serde_test::Configure;
+
+        let cnpj_str = "12.345.678/0001-95";
+        let cnpj = Cnpj::from_str(cnpj_str).unwrap();
+        serde_test::assert_tokens(&cnpj.readable(), &[serde_test::Token::Str(cnpj_str)]);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn serialize_compact() {
+        use serde_test::Configure;
+
+        let cnpj_bytes = &[1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1];
+        let cnpj = Cnpj::from_slice(cnpj_bytes).unwrap();
+        serde_test::assert_tokens(&cnpj.compact(), &[serde_test::Token::Bytes(cnpj_bytes)]);
     }
 }
