@@ -272,7 +272,7 @@ impl Serialize for Cpf {
         if serializer.is_human_readable() {
             serializer.serialize_str(&self.to_string())
         } else {
-            serializer.serialize_bytes(&self.as_bytes()[..9])
+            serializer.serialize_bytes(&self.as_ref())
         }
     }
 }
@@ -427,7 +427,7 @@ mod tests {
     fn serialize_compact() {
         use serde_test::Configure;
 
-        let cpf_bytes = &[1, 2, 3, 4, 5, 6, 7, 8, 9];
+        let cpf_bytes = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9];
         let cpf = Cpf::from_slice(cpf_bytes).unwrap();
         serde_test::assert_tokens(&cpf.compact(), &[serde_test::Token::Bytes(cpf_bytes)]);
     }

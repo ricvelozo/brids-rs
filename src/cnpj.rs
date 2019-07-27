@@ -308,7 +308,7 @@ impl Serialize for Cnpj {
         if serializer.is_human_readable() {
             serializer.serialize_str(&self.to_string())
         } else {
-            serializer.serialize_bytes(&self.as_bytes()[..12])
+            serializer.serialize_bytes(&self.as_ref())
         }
     }
 }
@@ -472,7 +472,7 @@ mod tests {
     fn serialize_compact() {
         use serde_test::Configure;
 
-        let cnpj_bytes = &[1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1];
+        let cnpj_bytes = &[1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5];
         let cnpj = Cnpj::from_slice(cnpj_bytes).unwrap();
         serde_test::assert_tokens(&cnpj.compact(), &[serde_test::Token::Bytes(cnpj_bytes)]);
     }
