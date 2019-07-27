@@ -14,7 +14,7 @@ use brids::Cpf;
 use std::io::{stdin, stdout, Write};
 
 fn main() {
-    print!("Input a CPF/ICN number: ");
+    print!("Input a CPF number: ");
     stdout().flush().ok();
 
     let mut input = String::with_capacity(14);

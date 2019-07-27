@@ -16,5 +16,5 @@ use rand::prelude::*;
 fn main() {
     let mut rng = SmallRng::seed_from_u64(123);
     println!("Random CNPJ number: {}", rng.gen::<Cnpj>());
-    println!("Random CPF/ICN number: {}", rng.gen::<Cpf>());
+    println!("Random CPF number: {}", rng.gen::<Cpf>());
 }

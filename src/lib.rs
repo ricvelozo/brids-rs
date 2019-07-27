@@ -10,7 +10,7 @@
 //
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
-//! Parse and generate random CPF/ICN and CNPJ, Brazil's ID numbers.
+//! Parse and generate random CPF and CNPJ, Brazil's ID numbers.
 //!
 //! # Usage
 //!
@@ -50,7 +50,7 @@
 //! use std::io::{stdin, stdout, Write};
 //!
 //! fn main() {
-//!     print!("Input a CPF/ICN number: ");
+//!     print!("Input a CPF number: ");
 //!     stdout().flush().ok();
 //!
 //!     let mut input = String::with_capacity(14);
@@ -63,14 +63,14 @@
 //! }
 //! ```
 //!
-//! Generate random CNPJ and CPF/ICN numbers:
+//! Generate random CNPJ and CPF numbers:
 //!
 //! ```rust
 //! use brids::{Cnpj, Cpf};
 //!
 //! fn main() {
 //!     println!("Random CNPJ number: {}", Cnpj::generate());
-//!     println!("Random CPF/ICN number: {}", Cpf::generate());
+//!     println!("Random CPF number: {}", Cpf::generate());
 //! }
 //! ```
 //!
@@ -83,7 +83,7 @@
 //! fn main() {
 //!     let mut rng = SmallRng::seed_from_u64(123);
 //!     println!("Random CNPJ number: {}", rng.gen::<Cnpj>());
-//!     println!("Random CPF/ICN number: {}", rng.gen::<Cpf>());
+//!     println!("Random CPF number: {}", rng.gen::<Cpf>());
 //! }
 //! ```
 //!
@@ -122,5 +122,4 @@ mod cnpj;
 mod cpf;
 
 pub use crate::cpf::*;
-pub type Icn = Cpf;
 pub use crate::cnpj::*;

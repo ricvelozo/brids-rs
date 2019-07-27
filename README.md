@@ -1,6 +1,6 @@
 # brids
 
-Parse and generate random CPF/ICN and CNPJ, Brazil's ID numbers.
+Parse and generate random CPF and CNPJ, Brazil's ID numbers.
 
 ## Usage
 
@@ -20,7 +20,7 @@ use brids::Cpf;
 use std::io::{stdin, stdout, Write};
 
 fn main() {
-    print!("Input a CPF/ICN number: ");
+    print!("Input a CPF number: ");
     stdout().flush().ok();
 
     let mut input = String::with_capacity(14);
@@ -33,14 +33,14 @@ fn main() {
 }
 ```
 
-Generate random CNPJ and CPF/ICN numbers:
+Generate random CNPJ and CPF numbers:
 
 ```rust
 use brids::{Cnpj, Cpf};
 
 fn main() {
     println!("Random CNPJ number: {}", Cnpj::generate());
-    println!("Random CPF/ICN number: {}", Cpf::generate());
+    println!("Random CPF number: {}", Cpf::generate());
 }
 ```
 

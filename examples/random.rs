@@ -14,5 +14,5 @@ use brids::{Cnpj, Cpf};
 
 fn main() {
     println!("Random CNPJ number: {}", Cnpj::generate());
-    println!("Random CPF/ICN number: {}", Cpf::generate());
+    println!("Random CPF number: {}", Cpf::generate());
 }

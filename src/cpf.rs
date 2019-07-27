@@ -20,7 +20,7 @@ use rand::{
 use serde::*;
 use std::{fmt, str::FromStr};
 
-/// An error which can be returned when parsing an CPF/ICN number.
+/// An error which can be returned when parsing an CPF number.
 #[derive(Fail, Debug, PartialEq, Eq)]
 pub enum ParseCpfError {
     #[fail(display = "Empty.")]
@@ -31,7 +31,7 @@ pub enum ParseCpfError {
     InvalidNumber,
 }
 
-/// A valid CPF/ICN number. Parsing recognizes numbers with or without separators (dot, minus,
+/// A valid CPF number. Parsing recognizes numbers with or without separators (dot, minus,
 /// slash, and space).
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Cpf([u8; 11]);
