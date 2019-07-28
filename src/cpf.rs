@@ -32,7 +32,7 @@ pub enum ParseCpfError {
 }
 
 /// A valid CPF number. Parsing recognizes numbers with or without separators (dot, minus,
-/// slash, and space).
+/// and slash).
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Cpf([u8; 11]);
 
@@ -70,7 +70,6 @@ impl Cpf {
             _ => return Err(ParseCpfError::InvalidNumber),
         }
 
-        let first_number = numbers[0];
         for (y, x) in numbers.iter_mut().zip(slice.iter()) {
             // 0..=9
             if *x > 9 {
@@ -80,6 +79,7 @@ impl Cpf {
         }
 
         // Checks for repeated numbers
+        let first_number = numbers[0];
         if slice.len() == 11 && numbers.iter().all(|&x| x == first_number) {
             return Err(ParseCpfError::InvalidNumber);
         }
@@ -178,33 +178,31 @@ impl FromStr for Cpf {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut numbers = [0; 11];
 
-        // Must start with a number
-        let mut chars = s.chars();
-        let first_number = match chars.next() {
-            Some(c @ '0'..='9') => c.to_digit(10).unwrap() as u8,
-            Some(c) => return Err(ParseCpfError::InvalidCharacter(c, 0)),
-            None => return Err(ParseCpfError::Empty),
-        };
-        numbers[0] = first_number;
+        if s.is_empty() {
+            return Err(ParseCpfError::Empty);
+        }
 
         // Checks for invalid symbols and converts numbers to integers
         let mut i = 0;
-        for (offset, c) in chars.enumerate() {
+        let mut has_dot = false;
+        for (offset, c) in s.chars().enumerate() {
             match c {
                 '0'..='9' => {
-                    if i < 10 {
-                        numbers[i + 1] = c.to_digit(10).unwrap() as u8;
+                    if i < 11 {
+                        numbers[i] = c.to_digit(10).unwrap() as u8;
                         i += 1;
                     } else {
                         return Err(ParseCpfError::InvalidNumber);
                     }
                 }
-                '.' | '-' | '/' | ' ' => continue,
-                _ => return Err(ParseCpfError::InvalidCharacter(c, offset + 1)),
-            };
+                '.' if offset == 3 || offset == 7 => has_dot = true,
+                '-' | '/' if (has_dot && offset == 11) || (!has_dot && offset == 9) => continue,
+                _ => return Err(ParseCpfError::InvalidCharacter(c, offset)),
+            }
         }
 
         // Checks for repeated numbers
+        let first_number = numbers[0];
         if numbers.iter().all(|&x| x == first_number) {
             return Err(ParseCpfError::InvalidNumber);
         }
@@ -390,17 +388,15 @@ mod tests {
     #[test]
     fn from_str() {
         let a = "123.456.789-09".parse::<Cpf>().unwrap();
-        let b = "123.456.789/09".parse::<Cpf>().unwrap();
+        let b = "123456789/09".parse::<Cpf>().unwrap();
         let c = "12345678909".parse::<Cpf>().unwrap();
-        let d = "123 456 789 09".parse::<Cpf>().unwrap();
 
         assert_eq!(a, b);
         assert_eq!(a, c);
-        assert_eq!(a, d);
         assert_eq!("".parse::<Cpf>(), Err(ParseCpfError::Empty));
         assert_eq!(
-            "123;456;789/09".parse::<Cpf>(),
-            Err(ParseCpfError::InvalidCharacter(';', 3))
+            "123-456-789-09".parse::<Cpf>(),
+            Err(ParseCpfError::InvalidCharacter('-', 3))
         );
         assert_eq!(
             "123.456.789-10".parse::<Cpf>(),

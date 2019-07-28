@@ -31,8 +31,8 @@ pub enum ParseCnpjError {
     InvalidNumber,
 }
 
-/// A valid CNPJ number. Parsing recognizes numbers with or without separators (dot, minus, slash,
-/// and space).
+/// A valid CNPJ number. Parsing recognizes numbers with or without separators (dot, minus,
+/// and slash).
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Cnpj([u8; 14]);
 
@@ -82,7 +82,6 @@ impl Cnpj {
             _ => return Err(ParseCnpjError::InvalidNumber),
         }
 
-        let first_number = numbers[0];
         for (y, x) in numbers.iter_mut().zip(slice.iter()) {
             // 0..=9
             if *x > 9 {
@@ -92,6 +91,7 @@ impl Cnpj {
         }
 
         // Checks for repeated numbers
+        let first_number = numbers[0];
         if slice.len() == 14 && numbers.iter().all(|&x| x == first_number) {
             return Err(ParseCnpjError::InvalidNumber);
         }
@@ -213,33 +213,32 @@ impl FromStr for Cnpj {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut numbers = [0; 14];
 
-        // Must start with a number
-        let mut chars = s.chars();
-        let first_number = match chars.next() {
-            Some(c @ '0'..='9') => c.to_digit(10).unwrap() as u8,
-            Some(c) => return Err(ParseCnpjError::InvalidCharacter(c, 0)),
-            None => return Err(ParseCnpjError::Empty),
-        };
-        numbers[0] = first_number;
+        if s.is_empty() {
+            return Err(ParseCnpjError::Empty);
+        }
 
         // Checks for invalid symbols and converts numbers to integers
         let mut i = 0;
-        for (offset, c) in chars.enumerate() {
+        let mut has_dot = false;
+        for (offset, c) in s.chars().enumerate() {
             match c {
                 '0'..='9' => {
-                    if i < 13 {
-                        numbers[i + 1] = c.to_digit(10).unwrap() as u8;
+                    if i < 14 {
+                        numbers[i] = c.to_digit(10).unwrap() as u8;
                         i += 1;
                     } else {
                         return Err(ParseCnpjError::InvalidNumber);
                     }
                 }
-                '.' | '-' | '/' | ' ' => continue,
-                _ => return Err(ParseCnpjError::InvalidCharacter(c, offset + 1)),
-            };
+                '.' if offset == 2 || offset == 6 => has_dot = true,
+                '/' if (has_dot && offset == 10) || (!has_dot && offset == 8) => continue,
+                '-' if (has_dot && offset == 15) || (!has_dot && offset == 13) => continue,
+                _ => return Err(ParseCnpjError::InvalidCharacter(c, offset)),
+            }
         }
 
         // Checks for repeated numbers
+        let first_number = numbers[0];
         if numbers.iter().all(|&x| x == first_number) {
             return Err(ParseCnpjError::InvalidNumber);
         }
@@ -437,15 +436,15 @@ mod tests {
     #[test]
     fn from_str() {
         let a = "12.345.678/0001-95".parse::<Cnpj>().unwrap();
-        let b = "12345678000195".parse::<Cnpj>().unwrap();
-        let c = "12 345 678 0001 95".parse::<Cnpj>().unwrap();
+        let b = "12345678/0001-95".parse::<Cnpj>().unwrap();
+        let c = "12345678000195".parse::<Cnpj>().unwrap();
 
         assert_eq!(a, b);
         assert_eq!(a, c);
         assert_eq!("".parse::<Cnpj>(), Err(ParseCnpjError::Empty));
         assert_eq!(
-            "12;345;678/0001-95".parse::<Cnpj>(),
-            Err(ParseCnpjError::InvalidCharacter(';', 2))
+            "12-345-678/0001-95".parse::<Cnpj>(),
+            Err(ParseCnpjError::InvalidCharacter('-', 2))
         );
         assert_eq!(
             "12.345.678/0001-96".parse::<Cnpj>(),
