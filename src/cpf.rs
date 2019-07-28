@@ -18,7 +18,7 @@ use rand::{
 };
 #[cfg(feature = "serde")]
 use serde::*;
-use std::{fmt, str::FromStr};
+use std::{convert::TryFrom, fmt, str::FromStr};
 
 /// An error which can be returned when parsing an CPF number.
 #[derive(Fail, Debug, PartialEq, Eq)]
@@ -149,6 +149,24 @@ impl AsRef<[u8]> for Cpf {
     #[inline]
     fn as_ref(&self) -> &[u8] {
         self.as_bytes()
+    }
+}
+
+impl TryFrom<&[u8]> for Cpf {
+    type Error = ParseCpfError;
+
+    #[inline]
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Self::from_slice(value)
+    }
+}
+
+impl TryFrom<&[u8; 11]> for Cpf {
+    type Error = ParseCpfError;
+
+    #[inline]
+    fn try_from(value: &[u8; 11]) -> Result<Self, Self::Error> {
+        Self::from_slice(value)
     }
 }
 
@@ -293,7 +311,7 @@ impl<'de> Deserialize<'de> for Cpf {
                 }
 
                 fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cpf, E> {
-                    Cpf::from_slice(value).map_err(E::custom)
+                    Cpf::try_from(value).map_err(E::custom)
                 }
             }
 
@@ -309,7 +327,7 @@ impl<'de> Deserialize<'de> for Cpf {
                 }
 
                 fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cpf, E> {
-                    Cpf::from_slice(value).map_err(E::custom)
+                    Cpf::try_from(value).map_err(E::custom)
                 }
             }
 
@@ -359,6 +377,14 @@ mod tests {
         let b = Cpf([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]);
 
         test_trait(b);
+    }
+
+    #[test]
+    fn try_from() {
+        let a: [u8; 11] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9];
+        let b = Cpf([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]);
+
+        assert_eq!(Cpf::try_from(&a).unwrap(), b);
     }
 
     #[test]
@@ -424,7 +450,7 @@ mod tests {
         use serde_test::Configure;
 
         let cpf_bytes = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9];
-        let cpf = Cpf::from_slice(cpf_bytes).unwrap();
+        let cpf = Cpf::try_from(cpf_bytes).unwrap();
         serde_test::assert_tokens(&cpf.compact(), &[serde_test::Token::Bytes(cpf_bytes)]);
     }
 }

@@ -18,7 +18,7 @@ use rand::{
 };
 #[cfg(feature = "serde")]
 use serde::*;
-use std::{fmt, str::FromStr};
+use std::{convert::TryFrom, fmt, str::FromStr};
 
 /// An error which can be returned when parsing an CNPJ number.
 #[derive(Fail, Debug, PartialEq, Eq)]
@@ -184,6 +184,24 @@ impl AsRef<[u8]> for Cnpj {
     }
 }
 
+impl TryFrom<&[u8]> for Cnpj {
+    type Error = ParseCnpjError;
+
+    #[inline]
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Self::from_slice(value)
+    }
+}
+
+impl TryFrom<&[u8; 14]> for Cnpj {
+    type Error = ParseCnpjError;
+
+    #[inline]
+    fn try_from(value: &[u8; 14]) -> Result<Self, Self::Error> {
+        Self::from_slice(value)
+    }
+}
+
 impl fmt::Debug for Cnpj {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Cnpj(\"{}\")", self)
@@ -330,7 +348,7 @@ impl<'de> Deserialize<'de> for Cnpj {
                 }
 
                 fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cnpj, E> {
-                    Cnpj::from_slice(value).map_err(E::custom)
+                    Cnpj::try_from(value).map_err(E::custom)
                 }
             }
 
@@ -346,7 +364,7 @@ impl<'de> Deserialize<'de> for Cnpj {
                 }
 
                 fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cnpj, E> {
-                    Cnpj::from_slice(value).map_err(E::custom)
+                    Cnpj::try_from(value).map_err(E::custom)
                 }
             }
 
@@ -407,6 +425,14 @@ mod tests {
         let b = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]);
 
         test_trait(b);
+    }
+
+    #[test]
+    fn try_from() {
+        let a: [u8; 14] = [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5];
+        let b = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]);
+
+        assert_eq!(Cnpj::try_from(&a).unwrap(), b);
     }
 
     #[test]
@@ -472,7 +498,7 @@ mod tests {
         use serde_test::Configure;
 
         let cnpj_bytes = &[1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5];
-        let cnpj = Cnpj::from_slice(cnpj_bytes).unwrap();
+        let cnpj = Cnpj::try_from(cnpj_bytes).unwrap();
         serde_test::assert_tokens(&cnpj.compact(), &[serde_test::Token::Bytes(cnpj_bytes)]);
     }
 }
