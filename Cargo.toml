@@ -10,7 +10,7 @@ edition = "2018"
 repository = "https://gitlab.com/ricvelozo/brids-rs"
 documentation = "https://docs.rs/brids"
 keywords = ["parser", "format", "validation", "cpf", "cnpj"]
-categories = ["parser-implementations", "value-formatting"]
+categories = ["parser-implementations", "value-formatting", "no-std"]
 readme = "README.md"
 
 [package.metadata.docs.rs]
@@ -21,7 +21,7 @@ gitlab = { repository = "ricvelozo/brids-rs" }
 travis-ci = { repository = "ricvelozo/brids-rs" }
 
 [dependencies]
-failure = "0.1"
+failure = { version = "0.1", default-features = false, features = ["derive"] }
 rand = { version = "0.6", optional = true }
 serde = { version = "1.0", optional = true }
 
@@ -31,16 +31,17 @@ serde_json = "1.0"
 serde_test = "1.0"
 
 [features]
-default = ["rand"]
+default = ["std", "rand"]
+std = ["failure/std"]
 
 [[example]]
 name = "random"
-required-features = ["rand"]
+required-features = ["std", "rand"]
 
 [[example]]
 name = "seed"
-required-features = ["rand"]
+required-features = ["std", "rand"]
 
 [[example]]
 name = "serde"
-required-features = ["rand", "serde"]
+required-features = ["std", "rand", "serde"]

@@ -29,7 +29,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! brids = { version = "0.4", default-features = false }
+//! brids = { version = "0.4", default-features = false, features = ["std"] }
 //! ```
 //!
 //! The [`serde`] crate is an optional dependency **disabled by default**. To enable, use:
@@ -39,6 +39,15 @@
 //! ```toml
 //! [dependencies]
 //! brids = { version = "0.4", features = ["serde"] }
+//! ```
+//!
+//! # `no_std` mode
+//!
+//! To enable `no_std` mode, just disable the default features:
+//!
+//! ```toml
+//! [dependencies]
+//! brids = { version = "0.4", default-features = false }
 //! ```
 //!
 //! # Examples
@@ -117,6 +126,12 @@
 //! ```
 
 #![warn(clippy::all)]
+
+#![cfg_attr(not(feature="std"), no_std)]
+#[cfg(not(feature = "std"))]
+#[allow(unused_imports)]
+#[macro_use]
+extern crate alloc;
 
 mod cnpj;
 mod cpf;

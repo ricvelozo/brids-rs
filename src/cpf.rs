@@ -10,6 +10,9 @@
 //
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
+use core::{convert::TryFrom, fmt, str::FromStr};
+#[cfg(all(feature = "serde", not(feature = "std")))]
+use crate::alloc::string::ToString;
 use failure::Fail;
 #[cfg(feature = "rand")]
 use rand::{
@@ -18,7 +21,6 @@ use rand::{
 };
 #[cfg(feature = "serde")]
 use serde::*;
-use std::{convert::TryFrom, fmt, str::FromStr};
 
 /// An error which can be returned when parsing an CPF number.
 #[derive(Fail, Debug, PartialEq, Eq)]
@@ -339,6 +341,8 @@ impl<'de> Deserialize<'de> for Cpf {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(not(feature = "std"))]
+    use crate::alloc::string::ToString;
 
     #[test]
     fn from_slice() {
