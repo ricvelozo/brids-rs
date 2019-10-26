@@ -62,7 +62,7 @@
 //!     print!("Input a CPF number: ");
 //!     stdout().flush().ok();
 //!
-//!     let mut input = String::with_capacity(14);
+//!     let mut input = String::new();
 //!     stdin().read_line(&mut input).ok();
 //!
 //!     match input.trim().parse::<Cpf>() {
