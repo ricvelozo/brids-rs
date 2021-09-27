@@ -10,9 +10,9 @@
 //
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
-use core::{convert::TryFrom, fmt, str::FromStr};
 #[cfg(all(feature = "serde", not(feature = "std")))]
 use crate::alloc::string::ToString;
+use core::{convert::TryFrom, fmt, str::FromStr};
 use failure::Fail;
 #[cfg(feature = "rand")]
 use rand::{
@@ -50,7 +50,7 @@ impl Cnpj {
     ///
     /// match Cnpj::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]) {
     ///     Ok(cnpj) => println!("{} is a valid number.", cnpj),
-    ///     Err(err) => println!("Error: {}", err),
+    ///     Err(err) => eprintln!("Error: {}", err),
     /// }
     /// ```
     ///
@@ -61,7 +61,7 @@ impl Cnpj {
     ///
     /// match Cnpj::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 2, 7]) {
     ///     Ok(cnpj) => println!("{} is a valid number.", cnpj),
-    ///     Err(err) => println!("Error: {}", err),
+    ///     Err(err) => eprintln!("Error: {}", err),
     /// }
     /// ```
     ///
@@ -72,7 +72,7 @@ impl Cnpj {
     ///
     /// match Cnpj::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8]) {
     ///     Ok(cnpj) => println!("{} is a valid number.", cnpj),
-    ///     Err(err) => println!("Error: {}", err),
+    ///     Err(err) => eprintln!("Error: {}", err),
     /// }
     /// ```
     pub fn from_slice(slice: &[u8]) -> Result<Self, ParseCnpjError> {

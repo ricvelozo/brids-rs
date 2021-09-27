@@ -56,18 +56,17 @@
 //!
 //! ```rust
 //! use brids::Cpf;
-//! use std::io::{stdin, stdout, Write};
+//! use std::io::stdin;
 //!
 //! fn main() {
-//!     print!("Input a CPF number: ");
-//!     stdout().flush().ok();
+//!     println!("Input a CPF number:");
 //!
 //!     let mut input = String::new();
 //!     stdin().read_line(&mut input).ok();
 //!
 //!     match input.trim().parse::<Cpf>() {
 //!         Ok(cpf) => println!("{} is a valid number.", cpf),
-//!         Err(err) => println!("Error: {}", err),
+//!         Err(err) => eprintln!("Error: {}", err),
 //!     }
 //! }
 //! ```
@@ -126,8 +125,7 @@
 //! ```
 
 #![warn(clippy::all)]
-
-#![cfg_attr(not(feature="std"), no_std)]
+#![cfg_attr(not(feature = "std"), no_std)]
 #[cfg(not(feature = "std"))]
 #[allow(unused_imports)]
 #[macro_use]
@@ -136,5 +134,5 @@ extern crate alloc;
 mod cnpj;
 mod cpf;
 
-pub use crate::cpf::*;
 pub use crate::cnpj::*;
+pub use crate::cpf::*;

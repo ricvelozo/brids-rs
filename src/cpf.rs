@@ -10,9 +10,9 @@
 //
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
-use core::{convert::TryFrom, fmt, str::FromStr};
 #[cfg(all(feature = "serde", not(feature = "std")))]
 use crate::alloc::string::ToString;
+use core::{convert::TryFrom, fmt, str::FromStr};
 use failure::Fail;
 #[cfg(feature = "rand")]
 use rand::{
@@ -50,7 +50,7 @@ impl Cpf {
     ///
     /// match Cpf::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]) {
     ///     Ok(cpf) => println!("{} is a valid number.", cpf),
-    ///     Err(err) => println!("Error: {}", err),
+    ///     Err(err) => eprintln!("Error: {}", err),
     /// }
     /// ```
     ///
@@ -61,7 +61,7 @@ impl Cpf {
     ///
     /// match Cpf::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8, 9]) {
     ///     Ok(cpf) => println!("{} is a valid number.", cpf),
-    ///     Err(err) => println!("Error: {}", err),
+    ///     Err(err) => eprintln!("Error: {}", err),
     /// }
     /// ```
     pub fn from_slice(slice: &[u8]) -> Result<Self, ParseCpfError> {

@@ -28,7 +28,7 @@ fn main() {
 
     match input.trim().parse::<Cpf>() {
         Ok(cpf) => println!("{} is a valid number.", cpf),
-        Err(err) => println!("Error: {}", err),
+        Err(err) => eprintln!("Error: {}", err),
     }
 }
 ```

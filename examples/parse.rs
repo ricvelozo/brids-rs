@@ -11,17 +11,16 @@
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
 use brids::Cpf;
-use std::io::{stdin, stdout, Write};
+use std::io::stdin;
 
 fn main() {
-    print!("Input a CPF number: ");
-    stdout().flush().ok();
+    println!("Input a CPF number:");
 
     let mut input = String::new();
     stdin().read_line(&mut input).ok();
 
     match input.trim().parse::<Cpf>() {
         Ok(cpf) => println!("{} is a valid number.", cpf),
-        Err(err) => println!("Error: {}", err),
+        Err(err) => eprintln!("Error: {}", err),
     }
 }

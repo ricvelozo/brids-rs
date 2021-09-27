@@ -11,7 +11,7 @@
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
 use brids::{Cnpj, Cpf};
-use rand::{SeedableRng, Rng, rngs::StdRng};
+use rand::{rngs::StdRng, Rng, SeedableRng};
 
 fn main() {
     let mut rng = StdRng::seed_from_u64(123);
