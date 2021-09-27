@@ -17,11 +17,10 @@ Parse and format:
 
 ```rust
 use brids::Cpf;
-use std::io::{stdin, stdout, Write};
+use std::io::stdin;
 
 fn main() {
-    print!("Input a CPF number: ");
-    stdout().flush().ok();
+    println!("Input a CPF number:");
 
     let mut input = String::new();
     stdin().read_line(&mut input).ok();
