@@ -111,7 +111,7 @@ impl Cnpj {
                 * 10
                 % 11;
 
-            if remainder == 10 || remainder == 11 {
+            if let 10 | 11 = remainder {
                 remainder = 0;
             }
 
@@ -241,8 +241,8 @@ impl FromStr for Cnpj {
         let mut i = 0;
         let mut has_dot = false;
         for (offset, c) in s.chars().enumerate() {
-            match c {
-                '0'..='9' => {
+            match (c, offset) {
+                ('0'..='9', _) => {
                     if i < 14 {
                         numbers[i] = c.to_digit(10).unwrap() as u8;
                         i += 1;
@@ -250,9 +250,11 @@ impl FromStr for Cnpj {
                         return Err(ParseCnpjError::InvalidNumber);
                     }
                 }
-                '.' if offset == 2 || offset == 6 => has_dot = true,
-                '/' if (has_dot && offset == 10) || (!has_dot && offset == 8) => continue,
-                '-' if (has_dot && offset == 15) || (!has_dot && offset == 13) => continue,
+                ('.', 2 | 6) => has_dot = true,
+                ('/', 10) if has_dot => continue,
+                ('/', 8) if !has_dot => continue,
+                ('-', 15) if has_dot => continue,
+                ('-', 13) if !has_dot => continue,
                 _ => return Err(ParseCnpjError::InvalidCharacter(c, offset)),
             }
         }
@@ -276,7 +278,7 @@ impl FromStr for Cnpj {
                 * 10
                 % 11;
 
-            if remainder == 10 || remainder == 11 {
+            if let 10 | 11 = remainder {
                 remainder = 0;
             }
 
@@ -310,7 +312,7 @@ impl Distribution<Cnpj> for Standard {
                 * 10
                 % 11;
 
-            if remainder == 10 || remainder == 11 {
+            if let 10 | 11 = remainder {
                 remainder = 0;
             }
 
