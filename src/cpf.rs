@@ -88,7 +88,7 @@ impl Cpf {
 
         for i in 0..=1 {
             let check_digit = numbers[9 + i];
-            let mut remainder = numbers
+            let remainder = numbers
                 .iter()
                 // Includes the first check digit in the second iteration
                 .take(9 + i)
@@ -99,13 +99,14 @@ impl Cpf {
                 * 10
                 % 11;
 
+            let mut remainder = remainder as u8;
             if let 10 | 11 = remainder {
                 remainder = 0;
             }
 
             if slice.len() < 11 {
-                numbers[9 + i] = remainder as u8; // check digit
-            } else if remainder != u32::from(check_digit) {
+                numbers[9 + i] = remainder; // check digit
+            } else if remainder != check_digit {
                 return Err(ParseCpfError::InvalidNumber);
             }
         }
@@ -230,7 +231,7 @@ impl FromStr for Cpf {
 
         for i in 0..=1 {
             let check_digit = numbers[9 + i];
-            let mut remainder = numbers
+            let remainder = numbers
                 .iter()
                 // Includes the first check digit in the second iteration
                 .take(9 + i)
@@ -241,11 +242,12 @@ impl FromStr for Cpf {
                 * 10
                 % 11;
 
+            let mut remainder = remainder as u8;
             if let 10 | 11 = remainder {
                 remainder = 0;
             }
 
-            if remainder != u32::from(check_digit) {
+            if remainder != check_digit {
                 return Err(ParseCpfError::InvalidNumber);
             }
         }
@@ -263,7 +265,7 @@ impl Distribution<Cpf> for Standard {
         }
 
         for i in 0..=1 {
-            let mut remainder = numbers
+            let remainder = numbers
                 .iter()
                 // Includes the first check digit in the second iteration
                 .take(9 + i)
@@ -274,11 +276,12 @@ impl Distribution<Cpf> for Standard {
                 * 10
                 % 11;
 
+            let mut remainder = remainder as u8;
             if let 10 | 11 = remainder {
                 remainder = 0;
             }
 
-            numbers[9 + i] = remainder as u8; // check digit
+            numbers[9 + i] = remainder; // check digit
         }
 
         Cpf(numbers)
