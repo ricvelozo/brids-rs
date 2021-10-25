@@ -17,13 +17,12 @@ Parse and format:
 
 ```rust
 use brids::Cpf;
-use std::io::stdin;
+use std::io;
 
 fn main() {
     println!("Input a CPF number:");
-
     let mut input = String::new();
-    stdin().read_line(&mut input).ok();
+    io::stdin().read_line(&mut input).unwrap();
 
     match input.trim().parse::<Cpf>() {
         Ok(cpf) => println!("{} is a valid number.", cpf),
