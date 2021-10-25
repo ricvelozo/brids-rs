@@ -20,7 +20,7 @@ use brids::Cpf;
 use std::io;
 
 fn main() {
-    println!("Input a CPF number:");
+    println!("Enter a CPF number:");
     let mut input = String::new();
     io::stdin().read_line(&mut input).unwrap();
 
