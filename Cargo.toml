@@ -6,7 +6,8 @@ license = "MIT OR Apache-2.0"
 description = """
 Parse and generate random CPF and CNPJ, Brazil's ID numbers.
 """
-edition = "2018"
+edition = "2021"
+rust-version = "1.56"
 repository = "https://gitlab.com/ricvelozo/brids-rs"
 documentation = "https://docs.rs/brids"
 keywords = ["parser", "format", "validation", "cpf", "cnpj"]
