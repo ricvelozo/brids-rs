@@ -61,8 +61,8 @@ impl Cnpj {
     /// use brids::Cnpj;
     ///
     /// match Cnpj::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]) {
-    ///     Ok(cnpj) => println!("{} is a valid number.", cnpj),
-    ///     Err(err) => eprintln!("Error: {}", err),
+    ///     Ok(cnpj) => println!("{cnpj} is a valid number."),
+    ///     Err(err) => eprintln!("Error: {err}"),
     /// }
     /// ```
     ///
@@ -72,8 +72,8 @@ impl Cnpj {
     /// use brids::Cnpj;
     ///
     /// match Cnpj::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 2, 7]) {
-    ///     Ok(cnpj) => println!("{} is a valid number.", cnpj),
-    ///     Err(err) => eprintln!("Error: {}", err),
+    ///     Ok(cnpj) => println!("{cnpj} is a valid number."),
+    ///     Err(err) => eprintln!("Error: {err}"),
     /// }
     /// ```
     ///
@@ -83,8 +83,8 @@ impl Cnpj {
     /// use brids::Cnpj;
     ///
     /// match Cnpj::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8]) {
-    ///     Ok(cnpj) => println!("{} is a valid number.", cnpj),
-    ///     Err(err) => eprintln!("Error: {}", err),
+    ///     Ok(cnpj) => println!("{cnpj} is a valid number."),
+    ///     Err(err) => eprintln!("Error: {err}"),
     /// }
     /// ```
     pub fn from_slice(slice: &[u8]) -> Result<Self, ParseCnpjError> {
@@ -219,7 +219,7 @@ impl TryFrom<&[u8; 14]> for Cnpj {
 
 impl fmt::Debug for Cnpj {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Cnpj(\"{}\")", self)
+        write!(f, "Cnpj(\"{self}\")")
     }
 }
 
@@ -234,7 +234,7 @@ impl fmt::Display for Cnpj {
             } else if i % 3 == 0 && i != 0 && i < 6 {
                 write!(f, ".")?;
             }
-            write!(f, "{}", number)?;
+            write!(f, "{number}")?;
         }
         Ok(())
     }
@@ -477,7 +477,7 @@ mod tests {
         let a = "12.345.678/0001-95";
         let b = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]);
 
-        assert_eq!(a, format!("{}", b));
+        assert_eq!(a, format!("{b}"));
     }
 
     #[test]

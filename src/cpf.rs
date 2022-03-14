@@ -61,8 +61,8 @@ impl Cpf {
     /// use brids::Cpf;
     ///
     /// match Cpf::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]) {
-    ///     Ok(cpf) => println!("{} is a valid number.", cpf),
-    ///     Err(err) => eprintln!("Error: {}", err),
+    ///     Ok(cpf) => println!("{cpf} is a valid number."),
+    ///     Err(err) => eprintln!("Error: {err}"),
     /// }
     /// ```
     ///
@@ -72,8 +72,8 @@ impl Cpf {
     /// use brids::Cpf;
     ///
     /// match Cpf::from_slice(&[1, 2, 3, 4, 5, 6, 7, 8, 9]) {
-    ///     Ok(cpf) => println!("{} is a valid number.", cpf),
-    ///     Err(err) => eprintln!("Error: {}", err),
+    ///     Ok(cpf) => println!("{cpf} is a valid number."),
+    ///     Err(err) => eprintln!("Error: {err}"),
     /// }
     /// ```
     pub fn from_slice(slice: &[u8]) -> Result<Self, ParseCpfError> {
@@ -187,7 +187,7 @@ impl TryFrom<&[u8; 11]> for Cpf {
 
 impl fmt::Debug for Cpf {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Cpf(\"{}\")", self)
+        write!(f, "Cpf(\"{self}\")")
     }
 }
 
@@ -199,7 +199,7 @@ impl fmt::Display for Cpf {
             } else if i % 3 == 0 && i != 0 {
                 write!(f, ".")?;
             }
-            write!(f, "{}", number)?;
+            write!(f, "{number}")?;
         }
         Ok(())
     }
@@ -428,7 +428,7 @@ mod tests {
         let a = "123.456.789-09";
         let b = Cpf([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]);
 
-        assert_eq!(a, format!("{}", b));
+        assert_eq!(a, format!("{b}"));
     }
 
     #[test]

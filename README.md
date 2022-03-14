@@ -25,8 +25,8 @@ fn main() {
     io::stdin().read_line(&mut input).unwrap();
 
     match input.trim().parse::<Cpf>() {
-        Ok(cpf) => println!("{} is a valid number.", cpf),
-        Err(err) => eprintln!("Error: {}", err),
+        Ok(cpf) => println!("{cpf} is a valid number."),
+        Err(err) => eprintln!("Error: {err}"),
     }
 }
 ```
