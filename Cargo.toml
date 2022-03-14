@@ -22,7 +22,6 @@ gitlab = { repository = "ricvelozo/brids-rs" }
 travis-ci = { repository = "ricvelozo/brids-rs" }
 
 [dependencies]
-failure = { version = "0.1", default-features = false, features = ["derive"] }
 rand = { version = "0.7", optional = true }
 serde = { version = "1.0", optional = true }
 
@@ -33,7 +32,7 @@ serde_test = "1.0"
 
 [features]
 default = ["std", "rand"]
-std = ["failure/std"]
+std = []
 
 [[example]]
 name = "random"

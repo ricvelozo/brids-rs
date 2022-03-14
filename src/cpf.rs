@@ -13,7 +13,6 @@
 #[cfg(all(feature = "serde", not(feature = "std")))]
 use crate::alloc::string::ToString;
 use core::{convert::TryFrom, fmt, str::FromStr};
-use failure::Fail;
 #[cfg(feature = "rand")]
 use rand::{
     distributions::{Distribution, Standard},
@@ -23,15 +22,28 @@ use rand::{
 use serde::*;
 
 /// An error which can be returned when parsing an CPF number.
-#[derive(Fail, Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum ParseCpfError {
-    #[fail(display = "Empty.")]
     Empty,
-    #[fail(display = "Invalid character `{}` at offset {}.", _0, _1)]
     InvalidCharacter(char, usize),
-    #[fail(display = "Invalid CPF number.")]
     InvalidNumber,
 }
+
+impl fmt::Display for ParseCpfError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Empty => write!(f, "empty"),
+            Self::InvalidCharacter(ch, offset) => {
+                write!(f, "invalid character `{ch}` at offset {offset}")
+            }
+            Self::InvalidNumber => write!(f, "invalid CPF number"),
+        }
+    }
+}
+
+#[cfg(not(feature = "std"))]
+impl std::error::Error for ParseCpfError {}
 
 /// A valid CPF number. Parsing recognizes numbers with or without separators (dot, minus,
 /// and slash).
