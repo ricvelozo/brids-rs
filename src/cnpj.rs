@@ -10,13 +10,15 @@
 //
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
-#[cfg(all(feature = "serde", not(feature = "std")))]
-use crate::alloc::string::ToString;
+#[cfg(not(feature = "std"))]
+use alloc::string::ToString;
 use core::{convert::TryFrom, fmt, str::FromStr};
+#[cfg(all(feature = "std", feature = "rand"))]
+use rand::thread_rng;
 #[cfg(feature = "rand")]
 use rand::{
     distributions::{Distribution, Standard},
-    thread_rng, Rng,
+    Rng,
 };
 #[cfg(feature = "serde")]
 use serde::*;
@@ -42,7 +44,7 @@ impl fmt::Display for ParseCnpjError {
     }
 }
 
-#[cfg(not(feature = "std"))]
+#[cfg(feature = "std")]
 impl std::error::Error for ParseCnpjError {}
 
 /// A valid CNPJ number. Parsing recognizes numbers with or without separators (dot, minus,
@@ -142,7 +144,7 @@ impl Cnpj {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```rust, ignore
     /// use brids::Cnpj;
     ///
     /// let cnpj = Cnpj::generate();
@@ -157,7 +159,7 @@ impl Cnpj {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```rust, ignore
     /// use brids::Cnpj;
     ///
     /// let cnpj = Cnpj::generate();
@@ -173,19 +175,17 @@ impl Cnpj {
             .sum::<u16>()
     }
 
-    /// Generates a random number, using [`rand::thread_rng`] (optional dependency enabled by
-    /// default). To use a different generator, instantiate the generator directly.
-    ///
-    /// [`rand::thread_rng`]: https://docs.rs/rand/0.6/rand/fn.thread_rng.html
+    /// Generates a random number, using [`rand::thread_rng`] (requires `std` and `rand` features).
+    /// To use a different generator, instantiate the generator directly.
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```rust, ignore
     /// use brids::Cnpj;
     ///
     /// let cnpj = Cnpj::generate();
     /// ```
-    #[cfg(feature = "rand")]
+    #[cfg(all(feature = "std", feature = "rand"))]
     #[inline]
     pub fn generate() -> Self {
         thread_rng().gen()
@@ -310,7 +310,7 @@ impl Distribution<Cnpj> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cnpj {
         let mut numbers = [0; 14];
         for number in numbers.iter_mut().take(8) {
-            *number = rng.gen_range(0, 9);
+            *number = rng.gen_range(0..=9);
         }
         numbers[11] = 1; // Company headquarters
 
@@ -396,7 +396,7 @@ impl<'de> Deserialize<'de> for Cnpj {
 mod tests {
     use super::*;
     #[cfg(not(feature = "std"))]
-    use crate::alloc::string::ToString;
+    use alloc::format;
 
     #[test]
     fn from_slice() {
@@ -469,7 +469,7 @@ mod tests {
         let a = r#"Cnpj("12.345.678/0001-95")"#;
         let b = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]);
 
-        assert_eq!(a, format!("{:?}", b));
+        assert_eq!(a, format!("{b:?}"));
     }
 
     #[test]

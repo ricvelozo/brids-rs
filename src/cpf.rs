@@ -10,13 +10,15 @@
 //
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
-#[cfg(all(feature = "serde", not(feature = "std")))]
-use crate::alloc::string::ToString;
+#[cfg(not(feature = "std"))]
+use alloc::string::ToString;
 use core::{convert::TryFrom, fmt, str::FromStr};
+#[cfg(all(feature = "std", feature = "rand"))]
+use rand::thread_rng;
 #[cfg(feature = "rand")]
 use rand::{
     distributions::{Distribution, Standard},
-    thread_rng, Rng,
+    Rng,
 };
 #[cfg(feature = "serde")]
 use serde::*;
@@ -42,7 +44,7 @@ impl fmt::Display for ParseCpfError {
     }
 }
 
-#[cfg(not(feature = "std"))]
+#[cfg(feature = "std")]
 impl std::error::Error for ParseCpfError {}
 
 /// A valid CPF number. Parsing recognizes numbers with or without separators (dot, minus,
@@ -130,7 +132,7 @@ impl Cpf {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```rust, ignore
     /// use brids::Cpf;
     ///
     /// let cpf = Cpf::generate();
@@ -141,19 +143,17 @@ impl Cpf {
         &self.0
     }
 
-    /// Generates a random number, using [`rand::thread_rng`] (optional dependency enabled by
-    /// default). To use a different generator, instantiate the generator directly.
-    ///
-    /// [`rand::thread_rng`]: https://docs.rs/rand/0.6/rand/fn.thread_rng.html
+    /// Generates a random number, using [`rand::thread_rng`] (requires `std` and `rand` features).
+    /// To use a different generator, instantiate the generator directly.
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```rust, ignore
     /// use brids::Cpf;
     ///
     /// let cpf = Cpf::generate();
     /// ```
-    #[cfg(feature = "rand")]
+    #[cfg(all(feature = "std", feature = "rand"))]
     #[inline]
     pub fn generate() -> Self {
         thread_rng().gen()
@@ -273,7 +273,7 @@ impl Distribution<Cpf> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cpf {
         let mut numbers = [0; 11];
         for number in numbers.iter_mut().take(9) {
-            *number = rng.gen_range(0, 9);
+            *number = rng.gen_range(0..=9);
         }
 
         for i in 0..=1 {
@@ -358,7 +358,7 @@ impl<'de> Deserialize<'de> for Cpf {
 mod tests {
     use super::*;
     #[cfg(not(feature = "std"))]
-    use crate::alloc::string::ToString;
+    use alloc::format;
 
     #[test]
     fn from_slice() {
@@ -420,7 +420,7 @@ mod tests {
         let a = r#"Cpf("123.456.789-09")"#;
         let b = Cpf([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]);
 
-        assert_eq!(a, format!("{:?}", b));
+        assert_eq!(a, format!("{b:?}"));
     }
 
     #[test]

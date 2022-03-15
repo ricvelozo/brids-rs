@@ -23,23 +23,10 @@
 //!
 //! # Dependencies
 //!
-//! The [`rand`] crate is an optional dependency enabled by default. To disable, use:
+//! All dependencies are optional and _disabled by default_:
 //!
-//! [`rand`]: https://crates.io/crates/rand
-//!
-//! ```toml
-//! [dependencies]
-//! brids = { version = "0.4", default-features = false, features = ["std"] }
-//! ```
-//!
-//! The [`serde`] crate is an optional dependency **disabled by default**. To enable, use:
-//!
-//! [`serde`]: https://crates.io/crates/serde
-//!
-//! ```toml
-//! [dependencies]
-//! brids = { version = "0.4", features = ["serde"] }
-//! ```
+//! * [`rand`] - enable to generate random numbers
+//! * [`serde`] - enable to (de)serialize numbers
 //!
 //! # `no_std` mode
 //!
@@ -70,9 +57,9 @@
 //! }
 //! ```
 //!
-//! Generate random CNPJ and CPF numbers:
+//! Generate random CNPJ and CPF numbers (you must enable the [`rand` feature](#dependencies)):
 //!
-//! ```rust
+//! ```rust, ignore
 //! use brids::{Cnpj, Cpf};
 //!
 //! fn main() {
@@ -83,9 +70,9 @@
 //!
 //! Using a different generator:
 //!
-//! ```rust
+//! ```rust, ignore
 //! use brids::{Cnpj, Cpf};
-//! use rand::{SeedableRng, Rng, rngs::StdRng};
+//! use rand::{rngs::StdRng, Rng, SeedableRng};
 //!
 //! fn main() {
 //!     let mut rng = StdRng::seed_from_u64(123);
@@ -98,10 +85,10 @@
 //!
 //! ```rust, ignore
 //! use brids::Cnpj;
-//! use serde_derive::{Deserialize, Serialize};
+//! use serde::{Deserialize, Serialize};
 //! use serde_json;
 //!
-//! #[derive(Debug, PartialEq, Serialize, Deserialize)]
+//! #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 //! struct Company<'a> {
 //!     name: &'a str,
 //!     cnpj: Cnpj,
@@ -115,7 +102,7 @@
 //!
 //!     // Serializes the struct into JSON
 //!     let json = serde_json::to_string(&company1).unwrap();
-//!     println!("{}", json);
+//!     println!("{json}");
 //!
 //!     // Deserializes the struct back
 //!     let company2: Company = serde_json::from_str(&json).unwrap();
@@ -125,9 +112,8 @@
 
 #![warn(clippy::all)]
 #![cfg_attr(not(feature = "std"), no_std)]
+
 #[cfg(not(feature = "std"))]
-#[allow(unused_imports)]
-#[macro_use]
 extern crate alloc;
 
 mod cnpj;

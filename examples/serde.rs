@@ -11,10 +11,10 @@
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
 use brids::Cnpj;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use serde_json;
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 struct Company<'a> {
     name: &'a str,
     cnpj: Cnpj,
@@ -28,7 +28,7 @@ fn main() {
 
     // Serializes the struct into JSON
     let json = serde_json::to_string(&company1).unwrap();
-    println!("{}", json);
+    println!("{json}");
 
     // Deserializes the struct back
     let company2: Company = serde_json::from_str(&json).unwrap();
