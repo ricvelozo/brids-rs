@@ -12,7 +12,11 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::string::ToString;
-use core::{convert::TryFrom, fmt, str::FromStr};
+use core::{
+    convert::TryFrom,
+    fmt::{self, Write},
+    str::FromStr,
+};
 #[cfg(all(feature = "std", feature = "rand"))]
 use rand::thread_rng;
 #[cfg(feature = "rand")]
@@ -34,12 +38,13 @@ pub enum ParseCnpjError {
 
 impl fmt::Display for ParseCnpjError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use ParseCnpjError::*;
         match self {
-            Self::Empty => write!(f, "empty"),
-            Self::InvalidCharacter(ch, offset) => {
+            Empty => write!(f, "empty"),
+            InvalidCharacter(ch, offset) => {
                 write!(f, "invalid character `{ch}` at offset {offset}")
             }
-            Self::InvalidNumber => write!(f, "invalid CNPJ number"),
+            InvalidNumber => write!(f, "invalid CNPJ number"),
         }
     }
 }
@@ -225,16 +230,15 @@ impl fmt::Debug for Cnpj {
 
 impl fmt::Display for Cnpj {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}{}.", self.0[0], self.0[1])?;
-        for (i, number) in self.0.iter().skip(2).enumerate() {
-            if i % 10 == 0 && i != 0 {
-                write!(f, "-")?;
-            } else if i % 6 == 0 && i != 0 {
-                write!(f, "/")?;
-            } else if i % 3 == 0 && i != 0 && i < 6 {
-                write!(f, ".")?;
+        for (i, number) in self.0.iter().enumerate() {
+            if i == 2 || i == 5 {
+                f.write_char('.')?;
+            } else if i == 8 {
+                f.write_char('/')?;
+            } else if i == 12 {
+                f.write_char('-')?;
             }
-            write!(f, "{number}")?;
+            number.fmt(f)?;
         }
         Ok(())
     }

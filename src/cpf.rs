@@ -12,7 +12,11 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::string::ToString;
-use core::{convert::TryFrom, fmt, str::FromStr};
+use core::{
+    convert::TryFrom,
+    fmt::{self, Write},
+    str::FromStr,
+};
 #[cfg(all(feature = "std", feature = "rand"))]
 use rand::thread_rng;
 #[cfg(feature = "rand")]
@@ -34,12 +38,13 @@ pub enum ParseCpfError {
 
 impl fmt::Display for ParseCpfError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use ParseCpfError::*;
         match self {
-            Self::Empty => write!(f, "empty"),
-            Self::InvalidCharacter(ch, offset) => {
+            Empty => write!(f, "empty"),
+            InvalidCharacter(ch, offset) => {
                 write!(f, "invalid character `{ch}` at offset {offset}")
             }
-            Self::InvalidNumber => write!(f, "invalid CPF number"),
+            InvalidNumber => write!(f, "invalid CPF number"),
         }
     }
 }
@@ -194,12 +199,12 @@ impl fmt::Debug for Cpf {
 impl fmt::Display for Cpf {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for (i, number) in self.0.iter().enumerate() {
-            if i % 9 == 0 && i != 0 {
-                write!(f, "-")?;
-            } else if i % 3 == 0 && i != 0 {
-                write!(f, ".")?;
+            if i == 3 || i == 6 {
+                f.write_char('.')?;
+            } else if i == 9 {
+                f.write_char('-')?;
             }
-            write!(f, "{number}")?;
+            number.fmt(f)?;
         }
         Ok(())
     }
