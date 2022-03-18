@@ -91,12 +91,12 @@ impl Cpf {
             _ => return Err(ParseCpfError::InvalidNumber),
         }
 
-        for (y, x) in numbers.iter_mut().zip(slice.iter()) {
+        for (y, &x) in numbers.iter_mut().zip(slice.iter()) {
             // 0..=9
-            if *x > 9 {
+            if x > 9 {
                 return Err(ParseCpfError::InvalidNumber);
             }
-            *y = *x;
+            *y = x;
         }
 
         // Checks for repeated numbers
@@ -199,10 +199,10 @@ impl fmt::Debug for Cpf {
 impl fmt::Display for Cpf {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for (i, number) in self.0.iter().enumerate() {
-            if i == 3 || i == 6 {
-                f.write_char('.')?;
-            } else if i == 9 {
-                f.write_char('-')?;
+            match i {
+                3 | 6 => f.write_char('.')?,
+                9 => f.write_char('-')?,
+                _ => (),
             }
             number.fmt(f)?;
         }

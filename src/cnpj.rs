@@ -103,12 +103,12 @@ impl Cnpj {
             _ => return Err(ParseCnpjError::InvalidNumber),
         }
 
-        for (y, x) in numbers.iter_mut().zip(slice.iter()) {
+        for (y, &x) in numbers.iter_mut().zip(slice.iter()) {
             // 0..=9
-            if *x > 9 {
+            if x > 9 {
                 return Err(ParseCnpjError::InvalidNumber);
             }
-            *y = *x;
+            *y = x;
         }
 
         // Checks for repeated numbers
@@ -231,12 +231,11 @@ impl fmt::Debug for Cnpj {
 impl fmt::Display for Cnpj {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for (i, number) in self.0.iter().enumerate() {
-            if i == 2 || i == 5 {
-                f.write_char('.')?;
-            } else if i == 8 {
-                f.write_char('/')?;
-            } else if i == 12 {
-                f.write_char('-')?;
+            match i {
+                2 | 5 => f.write_char('.')?,
+                8 => f.write_char('/')?,
+                12 => f.write_char('-')?,
+                _ => (),
             }
             number.fmt(f)?;
         }
