@@ -98,17 +98,18 @@ impl Cnpj {
         let mut numbers = [0; 14];
         match slice.len() {
             0 => return Err(ParseCnpjError::Empty),
-            8 => numbers[11] = 1, // Company headquarters
-            12 | 14 => (),
+            len @ (8 | 12 | 14) => {
+                numbers[..len].copy_from_slice(slice);
+                if len == 8 {
+                    numbers[11] = 1 // `0001` (company headquarters)
+                }
+            }
             _ => return Err(ParseCnpjError::InvalidNumber),
         }
 
-        for (y, &x) in numbers.iter_mut().zip(slice.iter()) {
-            // 0..=9
-            if x > 9 {
-                return Err(ParseCnpjError::InvalidNumber);
-            }
-            *y = x;
+        // 0..=9
+        if numbers.iter().any(|&x| x > 9) {
+            return Err(ParseCnpjError::InvalidNumber);
         }
 
         // Checks for repeated numbers
@@ -312,10 +313,10 @@ impl FromStr for Cnpj {
 impl Distribution<Cnpj> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cnpj {
         let mut numbers = [0; 14];
-        for number in numbers.iter_mut().take(8) {
+        for number in &mut numbers[..8] {
             *number = rng.gen_range(0..=9);
         }
-        numbers[11] = 1; // Company headquarters
+        numbers[11] = 1; // `0001` (company headquarters)
 
         for i in 0..=1 {
             let remainder = numbers

@@ -87,16 +87,13 @@ impl Cpf {
         let mut numbers = [0; 11];
         match slice.len() {
             0 => return Err(ParseCpfError::Empty),
-            9 | 11 => (),
+            len @ (9 | 11) => numbers[..len].copy_from_slice(slice),
             _ => return Err(ParseCpfError::InvalidNumber),
         }
 
-        for (y, &x) in numbers.iter_mut().zip(slice.iter()) {
-            // 0..=9
-            if x > 9 {
-                return Err(ParseCpfError::InvalidNumber);
-            }
-            *y = x;
+        // 0..=9
+        if numbers.iter().any(|&x| x > 9) {
+            return Err(ParseCpfError::InvalidNumber);
         }
 
         // Checks for repeated numbers
@@ -277,7 +274,7 @@ impl FromStr for Cpf {
 impl Distribution<Cpf> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cpf {
         let mut numbers = [0; 11];
-        for number in numbers.iter_mut().take(9) {
+        for number in &mut numbers[..9] {
             *number = rng.gen_range(0..=9);
         }
 
