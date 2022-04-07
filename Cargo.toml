@@ -39,7 +39,7 @@ serde_test = "1.0"
 
 [features]
 default = ["std"]
-std = ["rand/std", "serde/std"]
+std = ["rand?/std", "serde?/std"]
 
 [[example]]
 name = "random"
@@ -47,7 +47,7 @@ required-features = ["std", "rand"]
 
 [[example]]
 name = "seed"
-required-features = ["std", "rand"]
+required-features = ["rand"]
 
 [[example]]
 name = "serde"
