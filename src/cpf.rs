@@ -228,7 +228,8 @@ impl FromStr for Cpf {
             match (c, offset) {
                 ('0'..='9', _) => {
                     if i < 11 {
-                        numbers[i] = c.to_digit(10).unwrap() as u8;
+                        // SAFETY: Digit already matched
+                        numbers[i] = unsafe { c.to_digit(10).unwrap_unchecked() as u8 };
                         i += 1;
                     } else {
                         return Err(ParseCpfError::InvalidNumber);
