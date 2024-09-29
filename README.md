@@ -11,6 +11,25 @@ Add the following to your `Cargo.toml`:
 brids = "0.4"
 ```
 
+## Features
+
+All dependencies are optional and _disabled by default_:
+
+* [`rand`] - enable to generate random numbers
+* [`serde`] - enable to (de)serialize numbers
+
+[`rand`]: https://crates.io/crates/rand
+[`serde`]: https://crates.io/crates/serde
+
+# `no_std` mode
+
+To enable `no_std` mode, just disable the default features:
+
+```toml
+[dependencies]
+brids = { version = "0.4", default-features = false }
+```
+
 ## Examples
 
 Parse and format:

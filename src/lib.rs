@@ -21,12 +21,15 @@
 //! brids = "0.4"
 //! ```
 //!
-//! # Dependencies
+//! # Features
 //!
 //! All dependencies are optional and _disabled by default_:
 //!
 //! * [`rand`] - enable to generate random numbers
 //! * [`serde`] - enable to (de)serialize numbers
+//!
+//! [`rand`]: https://crates.io/crates/rand
+//! [`serde`]: https://crates.io/crates/serde
 //!
 //! # `no_std` mode
 //!
