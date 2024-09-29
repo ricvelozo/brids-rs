@@ -19,7 +19,6 @@ all-features = true
 
 [badges]
 gitlab = { repository = "ricvelozo/brids-rs" }
-travis-ci = { repository = "ricvelozo/brids-rs" }
 
 [dependencies.rand]
 version = "0.8.5"
