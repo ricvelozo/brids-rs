@@ -12,18 +12,22 @@
 
 #[cfg(not(feature = "std"))]
 use alloc::string::ToString;
+
 use core::{
     convert::TryFrom,
     fmt::{self, Write},
     str::FromStr,
 };
+
 #[cfg(all(feature = "std", feature = "rand"))]
 use rand::thread_rng;
+
 #[cfg(feature = "rand")]
 use rand::{
     distributions::{Distribution, Standard},
     Rng,
 };
+
 #[cfg(feature = "serde")]
 use serde::*;
 
@@ -359,6 +363,7 @@ impl<'de> Deserialize<'de> for Cpf {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[cfg(not(feature = "std"))]
     use alloc::format;
 

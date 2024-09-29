@@ -42,17 +42,20 @@
 //! Parse and format:
 //!
 //! ```rust
-//! use brids::Cpf;
 //! use std::io;
 //!
-//! fn main() {
-//!     println!("Enter a CPF number:");
-//!     let mut input = String::new();
-//!     io::stdin().read_line(&mut input).unwrap();
+//! use brids::Cpf;
 //!
-//!     match input.trim().parse::<Cpf>() {
-//!         Ok(cpf) => println!("{cpf} is a valid number."),
-//!         Err(err) => eprintln!("Error: {err}"),
+//! fn main() {
+//!     let mut buf = String::new();
+//!
+//!     println!("Enter a CPF number:");
+//!     while let Ok(2..) = io::stdin().read_line(&mut buf) {
+//!         match buf.trim().parse::<Cpf>() {
+//!             Ok(cpf) => println!("{cpf} is a valid number."),
+//!             Err(err) => eprintln!("Error: {err}"),
+//!         }
+//!         buf.clear();
 //!     }
 //! }
 //! ```
@@ -101,16 +104,15 @@
 //!     };
 //!
 //!     // Serializes the struct into JSON
-//!     let json = serde_json::to_string(&company1).unwrap();
+//!     let json = serde_json::to_string(&company1).expect("Failed to serialize");
 //!     println!("{json}");
 //!
 //!     // Deserializes the struct back
-//!     let company2: Company = serde_json::from_str(&json).unwrap();
+//!     let company2: Company = serde_json::from_str(&json).expect("Failed to deserialize");
 //!     assert_eq!(company1, company2);
 //! }
 //! ```
 
-#![warn(clippy::all)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(not(feature = "std"))]
@@ -119,5 +121,5 @@ extern crate alloc;
 mod cnpj;
 mod cpf;
 
-pub use crate::cnpj::*;
-pub use crate::cpf::*;
+pub use cnpj::*;
+pub use cpf::*;

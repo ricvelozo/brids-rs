@@ -27,10 +27,10 @@ fn main() {
     };
 
     // Serializes the struct into JSON
-    let json = serde_json::to_string(&company1).unwrap();
+    let json = serde_json::to_string(&company1).expect("Failed to serialize");
     println!("{json}");
 
     // Deserializes the struct back
-    let company2: Company = serde_json::from_str(&json).unwrap();
+    let company2: Company = serde_json::from_str(&json).expect("Failed to deserialize");
     assert_eq!(company1, company2);
 }
