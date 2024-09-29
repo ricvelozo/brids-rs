@@ -182,7 +182,7 @@ impl Cnpj {
             .rev()
             .enumerate()
             .map(|(i, &x)| u16::from(x) * 10u16.pow(i as u32))
-            .sum::<u16>()
+            .sum()
     }
 
     /// Generates a random number, using [`rand::thread_rng`] (requires `std` and `rand` features).
@@ -371,7 +371,7 @@ impl<'de> Deserialize<'de> for Cnpj {
                 }
 
                 fn visit_str<E: de::Error>(self, value: &str) -> Result<Cnpj, E> {
-                    value.parse::<Cnpj>().map_err(E::custom)
+                    value.parse().map_err(E::custom)
                 }
 
                 fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cnpj, E> {

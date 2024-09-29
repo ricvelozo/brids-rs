@@ -331,7 +331,7 @@ impl<'de> Deserialize<'de> for Cpf {
                 }
 
                 fn visit_str<E: de::Error>(self, value: &str) -> Result<Cpf, E> {
-                    value.parse::<Cpf>().map_err(E::custom)
+                    value.parse().map_err(E::custom)
                 }
 
                 fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cpf, E> {
