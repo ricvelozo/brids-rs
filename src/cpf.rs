@@ -10,9 +10,6 @@
 //
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
-#[cfg(not(feature = "std"))]
-use alloc::string::ToString;
-
 use core::{
     convert::TryFrom,
     fmt::{self, Write},
@@ -53,8 +50,7 @@ impl fmt::Display for ParseCpfError {
     }
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for ParseCpfError {}
+impl core::error::Error for ParseCpfError {}
 
 /// A valid CPF number. Parsing recognizes numbers with or without separators (dot, minus,
 /// and slash).
