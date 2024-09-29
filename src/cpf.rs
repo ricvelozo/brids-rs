@@ -174,6 +174,13 @@ impl AsRef<[u8]> for Cpf {
     }
 }
 
+impl From<Cpf> for [u8; 11] {
+    #[inline]
+    fn from(cpf: Cpf) -> [u8; 11] {
+        cpf.0
+    }
+}
+
 impl TryFrom<&[u8]> for Cpf {
     type Error = ParseCpfError;
 
@@ -377,6 +384,14 @@ mod tests {
         let b = Cpf([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]);
 
         test_trait(b);
+    }
+
+    #[test]
+    fn from() {
+        let a: [u8; 11] = Cpf([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9]).into();
+        let b: [u8; 11] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9];
+
+        assert_eq!(a, b);
     }
 
     #[test]

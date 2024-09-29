@@ -210,6 +210,13 @@ impl AsRef<[u8]> for Cnpj {
     }
 }
 
+impl From<Cnpj> for [u8; 14] {
+    #[inline]
+    fn from(cnpj: Cnpj) -> [u8; 14] {
+        cnpj.0
+    }
+}
+
 impl TryFrom<&[u8]> for Cnpj {
     type Error = ParseCnpjError;
 
@@ -428,6 +435,14 @@ mod tests {
         let b = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]);
 
         test_trait(b);
+    }
+
+    #[test]
+    fn from() {
+        let a: [u8; 14] = Cnpj([1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5]).into();
+        let b: [u8; 14] = [1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5];
+
+        assert_eq!(a, b);
     }
 
     #[test]
