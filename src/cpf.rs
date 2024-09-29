@@ -362,10 +362,10 @@ impl<'de> Deserialize<'de> for Cpf {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[cfg(not(feature = "std"))]
     use alloc::format;
+
+    use super::*;
 
     #[test]
     fn from_slice() {
