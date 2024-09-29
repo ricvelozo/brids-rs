@@ -22,7 +22,7 @@ gitlab = { repository = "ricvelozo/brids-rs" }
 travis-ci = { repository = "ricvelozo/brids-rs" }
 
 [dependencies.rand]
-version = "0.8"
+version = "0.8.5"
 optional = true
 default-features = false
 features = ["std_rng"]
