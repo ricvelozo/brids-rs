@@ -62,6 +62,25 @@ impl std::error::Error for ParseCnpjError {}
 pub struct Cnpj([u8; 14]);
 
 impl Cnpj {
+    #[inline]
+    fn remainder(numbers: impl IntoIterator<Item = u8>, i: usize) -> u8 {
+        let remainder = numbers
+            .into_iter()
+            // Includes the first check digit in the second iteration
+            .take(12 + i)
+            // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
+            .zip((2..=9).chain(2..=5 + i).rev())
+            .map(|(x, y)| u32::from(x) * y as u32)
+            .sum::<u32>()
+            * 10
+            % 11;
+
+        match remainder {
+            10 | 11 => 0,
+            _ => remainder as u8,
+        }
+    }
+
     /// Parses a byte slice of numbers as an CNPJ, guessing the missing parts.
     ///
     /// # Examples
@@ -123,22 +142,8 @@ impl Cnpj {
         }
 
         for i in 0..=1 {
+            let remainder = Cnpj::remainder(numbers, i);
             let check_digit = numbers[12 + i];
-            let remainder = numbers
-                .iter()
-                // Includes the first check digit in the second iteration
-                .take(12 + i)
-                // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
-                .zip((2..=9).chain(2..=5 + i).rev())
-                .map(|(&x, y)| u32::from(x) * y as u32)
-                .sum::<u32>()
-                * 10
-                % 11;
-
-            let mut remainder = remainder as u8;
-            if let 10 | 11 = remainder {
-                remainder = 0;
-            }
 
             if slice.len() < 14 {
                 numbers[12 + i] = remainder; // check digit
@@ -261,12 +266,12 @@ impl FromStr for Cnpj {
         // Checks for invalid symbols and converts numbers to integers
         let mut i = 0;
         let mut has_dot = false;
-        for (offset, c) in s.chars().enumerate() {
-            match (c, offset) {
+        for (offset, ch) in s.chars().enumerate() {
+            match (ch, offset) {
                 ('0'..='9', _) => {
                     if i < 14 {
                         // SAFETY: Digit already matched
-                        numbers[i] = unsafe { c.to_digit(10).unwrap_unchecked() as u8 };
+                        numbers[i] = unsafe { ch.to_digit(10).unwrap_unchecked() as u8 };
                         i += 1;
                     } else {
                         return Err(ParseCnpjError::InvalidNumber);
@@ -277,7 +282,7 @@ impl FromStr for Cnpj {
                 ('/', 8) if !has_dot => continue,
                 ('-', 15) if has_dot => continue,
                 ('-', 13) if !has_dot => continue,
-                _ => return Err(ParseCnpjError::InvalidCharacter(c, offset)),
+                _ => return Err(ParseCnpjError::InvalidCharacter(ch, offset)),
             }
         }
 
@@ -288,22 +293,8 @@ impl FromStr for Cnpj {
         }
 
         for i in 0..=1 {
+            let remainder = Cnpj::remainder(numbers, i);
             let check_digit = numbers[12 + i];
-            let remainder = numbers
-                .iter()
-                // Includes the first check digit in the second iteration
-                .take(12 + i)
-                // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
-                .zip((2..=9).chain(2..=5 + i).rev())
-                .map(|(&x, y)| u32::from(x) * y as u32)
-                .sum::<u32>()
-                * 10
-                % 11;
-
-            let mut remainder = remainder as u8;
-            if let 10 | 11 = remainder {
-                remainder = 0;
-            }
 
             if remainder != check_digit {
                 return Err(ParseCnpjError::InvalidNumber);
@@ -324,22 +315,7 @@ impl Distribution<Cnpj> for Standard {
         numbers[11] = 1; // `0001` (company headquarters)
 
         for i in 0..=1 {
-            let remainder = numbers
-                .iter()
-                // Includes the first check digit in the second iteration
-                .take(12 + i)
-                // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
-                .zip((2..=9).chain(2..=5 + i).rev())
-                .map(|(&x, y)| u32::from(x) * y as u32)
-                .sum::<u32>()
-                * 10
-                % 11;
-
-            let mut remainder = remainder as u8;
-            if let 10 | 11 = remainder {
-                remainder = 0;
-            }
-
+            let remainder = Cnpj::remainder(numbers, i);
             numbers[12 + i] = remainder; // check digit
         }
 

@@ -62,6 +62,25 @@ impl std::error::Error for ParseCpfError {}
 pub struct Cpf([u8; 11]);
 
 impl Cpf {
+    #[inline]
+    fn remainder(numbers: impl IntoIterator<Item = u8>, i: usize) -> u8 {
+        let remainder = numbers
+            .into_iter()
+            // Includes the first check digit in the second iteration
+            .take(9 + i)
+            // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
+            .zip((2..=10 + i).rev())
+            .map(|(x, y)| u32::from(x) * y as u32)
+            .sum::<u32>()
+            * 10
+            % 11;
+
+        match remainder {
+            10 | 11 => 0,
+            _ => remainder as u8,
+        }
+    }
+
     /// Parses a byte slice of numbers as an CPF, guessing the missing parts.
     ///
     /// # Examples
@@ -107,22 +126,8 @@ impl Cpf {
         }
 
         for i in 0..=1 {
+            let remainder = Cpf::remainder(numbers, i);
             let check_digit = numbers[9 + i];
-            let remainder = numbers
-                .iter()
-                // Includes the first check digit in the second iteration
-                .take(9 + i)
-                // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
-                .zip((2..=10 + i).rev())
-                .map(|(&x, y)| u32::from(x) * y as u32)
-                .sum::<u32>()
-                * 10
-                % 11;
-
-            let mut remainder = remainder as u8;
-            if let 10 | 11 = remainder {
-                remainder = 0;
-            }
 
             if slice.len() < 11 {
                 numbers[9 + i] = remainder; // check digit
@@ -224,12 +229,12 @@ impl FromStr for Cpf {
         // Checks for invalid symbols and converts numbers to integers
         let mut i = 0;
         let mut has_dot = false;
-        for (offset, c) in s.chars().enumerate() {
-            match (c, offset) {
+        for (offset, ch) in s.chars().enumerate() {
+            match (ch, offset) {
                 ('0'..='9', _) => {
                     if i < 11 {
                         // SAFETY: Digit already matched
-                        numbers[i] = unsafe { c.to_digit(10).unwrap_unchecked() as u8 };
+                        numbers[i] = unsafe { ch.to_digit(10).unwrap_unchecked() as u8 };
                         i += 1;
                     } else {
                         return Err(ParseCpfError::InvalidNumber);
@@ -238,7 +243,7 @@ impl FromStr for Cpf {
                 ('.', 3 | 7) => has_dot = true,
                 ('-' | '/', 11) if has_dot => continue,
                 ('-' | '/', 9) if !has_dot => continue,
-                _ => return Err(ParseCpfError::InvalidCharacter(c, offset)),
+                _ => return Err(ParseCpfError::InvalidCharacter(ch, offset)),
             }
         }
 
@@ -249,22 +254,8 @@ impl FromStr for Cpf {
         }
 
         for i in 0..=1 {
+            let remainder = Cpf::remainder(numbers, i);
             let check_digit = numbers[9 + i];
-            let remainder = numbers
-                .iter()
-                // Includes the first check digit in the second iteration
-                .take(9 + i)
-                // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
-                .zip((2..=10 + i).rev())
-                .map(|(&x, y)| u32::from(x) * y as u32)
-                .sum::<u32>()
-                * 10
-                % 11;
-
-            let mut remainder = remainder as u8;
-            if let 10 | 11 = remainder {
-                remainder = 0;
-            }
 
             if remainder != check_digit {
                 return Err(ParseCpfError::InvalidNumber);
@@ -284,22 +275,7 @@ impl Distribution<Cpf> for Standard {
         }
 
         for i in 0..=1 {
-            let remainder = numbers
-                .iter()
-                // Includes the first check digit in the second iteration
-                .take(9 + i)
-                // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
-                .zip((2..=10 + i).rev())
-                .map(|(&x, y)| u32::from(x) * y as u32)
-                .sum::<u32>()
-                * 10
-                % 11;
-
-            let mut remainder = remainder as u8;
-            if let 10 | 11 = remainder {
-                remainder = 0;
-            }
-
+            let remainder = Cpf::remainder(numbers, i);
             numbers[9 + i] = remainder; // check digit
         }
 
