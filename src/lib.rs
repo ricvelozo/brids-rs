@@ -42,15 +42,14 @@
 //! Parse and format:
 //!
 //! ```rust
-//! use std::io;
-//!
 //! use brids::Cpf;
 //!
 //! fn main() {
 //!     let mut buf = String::new();
 //!
 //!     println!("Enter a CPF number:");
-//!     while let Ok(2..) = io::stdin().read_line(&mut buf) {
+//!
+//!     while let Ok(2..) = std::io::stdin().read_line(&mut buf) {
 //!         match buf.trim().parse::<Cpf>() {
 //!             Ok(cpf) => println!("{cpf} is a valid number."),
 //!             Err(err) => eprintln!("Error: {err}"),
