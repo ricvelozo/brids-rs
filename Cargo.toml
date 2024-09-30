@@ -11,7 +11,7 @@ rust-version = "1.81"
 repository = "https://gitlab.com/ricvelozo/brids-rs"
 documentation = "https://docs.rs/brids"
 keywords = ["parser", "format", "validation", "cpf", "cnpj"]
-categories = ["parser-implementations", "value-formatting", "no_std", "no-std"]
+categories = ["parser-implementations", "value-formatting", "no-std"]
 readme = "README.md"
 
 [package.metadata.docs.rs]
