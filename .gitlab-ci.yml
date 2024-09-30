@@ -1,22 +1,22 @@
 stages:
-  - build
+  - test
 
 rust-latest:
-  stage: build
+  stage: test
   image: rust:latest
   script:
     - cargo test --verbose --no-default-features # no_std
     - cargo test --verbose --all-features
 
 rust-beta:
-  stage: build
+  stage: test
   image: rustdocker/rust:beta
   script:
     - cargo test --verbose --no-default-features # no_std
     - cargo test --verbose --all-features
 
 rust-nightly:
-  stage: build
+  stage: test
   image: rustlang/rust:nightly
   script:
     - cargo test --verbose --no-default-features # no_std
