@@ -8,7 +8,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-brids = "0.4"
+brids = "0.5"
 ```
 
 ## Features
@@ -27,7 +27,7 @@ To enable `no_std` mode, just disable the default features:
 
 ```toml
 [dependencies]
-brids = { version = "0.4", default-features = false }
+brids = { version = "0.5", default-features = false }
 ```
 
 ## Examples

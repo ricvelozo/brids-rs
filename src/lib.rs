@@ -18,7 +18,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! brids = "0.4"
+//! brids = "0.5"
 //! ```
 //!
 //! # Features
@@ -37,7 +37,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! brids = { version = "0.4", default-features = false }
+//! brids = { version = "0.5", default-features = false }
 //! ```
 //!
 //! # Examples

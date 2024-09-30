@@ -1,5 +1,14 @@
 # Releases
 
+## Version 0.5.0 (2024-09-29)
+
+* Update to Rust 2021 edition and add minimum supported Rust version (1.81)
+* Add `no_std` support
+* Remove `failure` dependency
+* Remove "compact" (de)serialization
+* Stricter parsing
+* Refactor and some optimizations
+
 ## Version 0.4.0 (2018-12-21)
 
 * Update to Rust 2018 edition
