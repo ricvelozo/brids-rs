@@ -329,54 +329,32 @@ impl Distribution<Cnpj> for Standard {
 #[cfg(feature = "serde")]
 impl Serialize for Cnpj {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        if serializer.is_human_readable() {
-            serializer.serialize_str(&self.to_string())
-        } else {
-            serializer.serialize_bytes(&self.as_ref())
-        }
+        serializer.serialize_str(&self.to_string())
     }
 }
 
 #[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for Cnpj {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        if deserializer.is_human_readable() {
-            struct CnpjStringVisitor;
+        struct CnpjStringVisitor;
 
-            impl<'vi> de::Visitor<'vi> for CnpjStringVisitor {
-                type Value = Cnpj;
+        impl<'vi> de::Visitor<'vi> for CnpjStringVisitor {
+            type Value = Cnpj;
 
-                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    write!(formatter, "a CNPJ string")
-                }
-
-                fn visit_str<E: de::Error>(self, value: &str) -> Result<Cnpj, E> {
-                    value.parse().map_err(E::custom)
-                }
-
-                fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cnpj, E> {
-                    Cnpj::try_from(value).map_err(E::custom)
-                }
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                write!(formatter, "a CNPJ string")
             }
 
-            deserializer.deserialize_str(CnpjStringVisitor)
-        } else {
-            struct CnpjBytesVisitor;
-
-            impl<'vi> de::Visitor<'vi> for CnpjBytesVisitor {
-                type Value = Cnpj;
-
-                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    write!(formatter, "bytes")
-                }
-
-                fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cnpj, E> {
-                    Cnpj::try_from(value).map_err(E::custom)
-                }
+            fn visit_str<E: de::Error>(self, value: &str) -> Result<Cnpj, E> {
+                value.parse().map_err(E::custom)
             }
 
-            deserializer.deserialize_bytes(CnpjBytesVisitor)
+            fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cnpj, E> {
+                Cnpj::try_from(value).map_err(E::custom)
+            }
         }
+
+        deserializer.deserialize_str(CnpjStringVisitor)
     }
 }
 
@@ -502,21 +480,9 @@ mod tests {
 
     #[cfg(feature = "serde")]
     #[test]
-    fn serialize_readable() {
-        use serde_test::Configure;
-
+    fn serialize() {
         let cnpj_str = "12.345.678/0001-95";
         let cnpj = Cnpj::from_str(cnpj_str).unwrap();
-        serde_test::assert_tokens(&cnpj.readable(), &[serde_test::Token::Str(cnpj_str)]);
-    }
-
-    #[cfg(feature = "serde")]
-    #[test]
-    fn serialize_compact() {
-        use serde_test::Configure;
-
-        let cnpj_bytes = &[1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 1, 9, 5];
-        let cnpj = Cnpj::try_from(cnpj_bytes).unwrap();
-        serde_test::assert_tokens(&cnpj.compact(), &[serde_test::Token::Bytes(cnpj_bytes)]);
+        serde_test::assert_tokens(&cnpj, &[serde_test::Token::Str(cnpj_str)]);
     }
 }

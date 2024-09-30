@@ -289,54 +289,32 @@ impl Distribution<Cpf> for Standard {
 #[cfg(feature = "serde")]
 impl Serialize for Cpf {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        if serializer.is_human_readable() {
-            serializer.serialize_str(&self.to_string())
-        } else {
-            serializer.serialize_bytes(&self.as_ref())
-        }
+        serializer.serialize_str(&self.to_string())
     }
 }
 
 #[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for Cpf {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        if deserializer.is_human_readable() {
-            struct CpfStringVisitor;
+        struct CpfStringVisitor;
 
-            impl<'vi> de::Visitor<'vi> for CpfStringVisitor {
-                type Value = Cpf;
+        impl<'vi> de::Visitor<'vi> for CpfStringVisitor {
+            type Value = Cpf;
 
-                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    write!(formatter, "a CPF string")
-                }
-
-                fn visit_str<E: de::Error>(self, value: &str) -> Result<Cpf, E> {
-                    value.parse().map_err(E::custom)
-                }
-
-                fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cpf, E> {
-                    Cpf::try_from(value).map_err(E::custom)
-                }
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                write!(formatter, "a CPF string")
             }
 
-            deserializer.deserialize_str(CpfStringVisitor)
-        } else {
-            struct CpfBytesVisitor;
-
-            impl<'vi> de::Visitor<'vi> for CpfBytesVisitor {
-                type Value = Cpf;
-
-                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    write!(formatter, "bytes")
-                }
-
-                fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cpf, E> {
-                    Cpf::try_from(value).map_err(E::custom)
-                }
+            fn visit_str<E: de::Error>(self, value: &str) -> Result<Cpf, E> {
+                value.parse().map_err(E::custom)
             }
 
-            deserializer.deserialize_bytes(CpfBytesVisitor)
+            fn visit_bytes<E: de::Error>(self, value: &[u8]) -> Result<Cpf, E> {
+                Cpf::try_from(value).map_err(E::custom)
+            }
         }
+
+        deserializer.deserialize_str(CpfStringVisitor)
     }
 }
 
@@ -451,21 +429,9 @@ mod tests {
 
     #[cfg(feature = "serde")]
     #[test]
-    fn serialize_readable() {
-        use serde_test::Configure;
-
+    fn serialize() {
         let cpf_str = "123.456.789-09";
         let cpf = Cpf::from_str(cpf_str).unwrap();
-        serde_test::assert_tokens(&cpf.readable(), &[serde_test::Token::Str(cpf_str)]);
-    }
-
-    #[cfg(feature = "serde")]
-    #[test]
-    fn serialize_compact() {
-        use serde_test::Configure;
-
-        let cpf_bytes = &[1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 9];
-        let cpf = Cpf::try_from(cpf_bytes).unwrap();
-        serde_test::assert_tokens(&cpf.compact(), &[serde_test::Token::Bytes(cpf_bytes)]);
+        serde_test::assert_tokens(&cpf, &[serde_test::Token::Str(cpf_str)]);
     }
 }
