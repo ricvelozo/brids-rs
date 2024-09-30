@@ -21,7 +21,7 @@ All dependencies are optional and _disabled by default_:
 [`rand`]: https://crates.io/crates/rand
 [`serde`]: https://crates.io/crates/serde
 
-# `no_std` mode
+### `no_std` mode
 
 To enable `no_std` mode, just disable the default features:
 
