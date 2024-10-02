@@ -1,5 +1,9 @@
 # Releases
 
+## Version 0.5.1 (2024-10-02)
+
+* Refactor and improve documentation
+
 ## Version 0.5.0 (2024-09-29)
 
 * Update to Rust 2021 edition and add minimum supported Rust version (1.81)
