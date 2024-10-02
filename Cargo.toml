@@ -50,4 +50,4 @@ required-features = ["rand"]
 
 [[example]]
 name = "serde"
-required-features = ["std", "rand", "serde"]
+required-features = ["std", "serde"]

@@ -58,25 +58,6 @@ impl core::error::Error for ParseCnpjError {}
 pub struct Cnpj([u8; 14]);
 
 impl Cnpj {
-    #[inline]
-    fn remainder(numbers: impl IntoIterator<Item = u8>, i: usize) -> u8 {
-        let remainder = numbers
-            .into_iter()
-            // Includes the first check digit in the second iteration
-            .take(12 + i)
-            // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
-            .zip((2..=9).chain(2..=5 + i).rev())
-            .map(|(x, y)| u32::from(x) * y as u32)
-            .sum::<u32>()
-            * 10
-            % 11;
-
-        match remainder {
-            10 | 11 => 0,
-            _ => remainder as u8,
-        }
-    }
-
     /// Parses a byte slice of numbers as an CNPJ, guessing the missing parts.
     ///
     /// # Examples
@@ -120,7 +101,7 @@ impl Cnpj {
             len @ (8 | 12 | 14) => {
                 numbers[..len].copy_from_slice(slice);
                 if len == 8 {
-                    numbers[11] = 1 // `0001` (company headquarters)
+                    numbers[11] = 1; // `0001` (company headquarters)
                 }
             }
             _ => return Err(ParseCnpjError::InvalidNumber),
@@ -138,7 +119,7 @@ impl Cnpj {
         }
 
         for i in 0..=1 {
-            let remainder = Cnpj::remainder(numbers, i);
+            let remainder = calc_remainder(numbers, i);
             let check_digit = numbers[12 + i];
 
             if slice.len() < 14 {
@@ -155,26 +136,26 @@ impl Cnpj {
     ///
     /// # Examples
     ///
-    /// ```rust, ignore
+    /// ```rust
     /// use brids::Cnpj;
     ///
-    /// let cnpj = Cnpj::generate();
-    /// let bytes = cnpj.as_bytes();
+    /// let cnpj = "00.000.000/0001-91".parse::<Cnpj>().expect("Invalid CNPJ");
+    /// let digits = cnpj.as_bytes();
     /// ```
     #[inline]
     pub fn as_bytes(&self) -> &[u8; 14] {
         &self.0
     }
 
-    /// Returns the entity branch.
+    /// Returns the entity branch/subsidiary.
     ///
     /// # Examples
     ///
-    /// ```rust, ignore
+    /// ```rust
     /// use brids::Cnpj;
     ///
-    /// let cnpj = Cnpj::generate();
-    /// let branch = cnpj.branch();
+    /// let cnpj = "00.000.000/0001-91".parse::<Cnpj>().expect("Invalid CNPJ");
+    /// let branch = cnpj.branch(); // 1
     /// ```
     #[inline]
     pub fn branch(&self) -> u16 {
@@ -191,7 +172,7 @@ impl Cnpj {
     ///
     /// # Examples
     ///
-    /// ```rust, ignore
+    /// ```rust
     /// use brids::Cnpj;
     ///
     /// let cnpj = Cnpj::generate();
@@ -289,6 +270,11 @@ impl FromStr for Cnpj {
             }
         }
 
+        // Checks the length
+        if i != 14 {
+            return Err(ParseCnpjError::InvalidNumber);
+        }
+
         // Checks for repeated numbers
         let first_number = numbers[0];
         if numbers.iter().all(|&x| x == first_number) {
@@ -296,7 +282,7 @@ impl FromStr for Cnpj {
         }
 
         for i in 0..=1 {
-            let remainder = Cnpj::remainder(numbers, i);
+            let remainder = calc_remainder(numbers, i);
             let check_digit = numbers[12 + i];
 
             if remainder != check_digit {
@@ -318,8 +304,7 @@ impl Distribution<Cnpj> for Standard {
         numbers[11] = 1; // `0001` (company headquarters)
 
         for i in 0..=1 {
-            let remainder = Cnpj::remainder(numbers, i);
-            numbers[12 + i] = remainder; // check digit
+            numbers[12 + i] = calc_remainder(numbers, i); // check digit
         }
 
         Cnpj(numbers)
@@ -355,6 +340,25 @@ impl<'de> Deserialize<'de> for Cnpj {
         }
 
         deserializer.deserialize_str(CnpjStringVisitor)
+    }
+}
+
+#[inline]
+fn calc_remainder(numbers: impl IntoIterator<Item = u8>, i: usize) -> u8 {
+    let remainder = numbers
+        .into_iter()
+        // Includes the first check digit in the second iteration
+        .take(12 + i)
+        // 5, 4, 3, 2, 9, 8, 7, ... 3, 2; and after: 6, 5, 4, 3, 2, 9, 8, 7, ... 3, 2
+        .zip((2..=9).chain(2..=5 + i).rev())
+        .map(|(x, y)| u32::from(x) * y as u32)
+        .sum::<u32>()
+        * 10
+        % 11;
+
+    match remainder {
+        10 | 11 => 0,
+        _ => remainder as u8,
     }
 }
 

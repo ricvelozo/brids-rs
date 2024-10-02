@@ -58,25 +58,6 @@ impl core::error::Error for ParseCpfError {}
 pub struct Cpf([u8; 11]);
 
 impl Cpf {
-    #[inline]
-    fn remainder(numbers: impl IntoIterator<Item = u8>, i: usize) -> u8 {
-        let remainder = numbers
-            .into_iter()
-            // Includes the first check digit in the second iteration
-            .take(9 + i)
-            // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
-            .zip((2..=10 + i).rev())
-            .map(|(x, y)| u32::from(x) * y as u32)
-            .sum::<u32>()
-            * 10
-            % 11;
-
-        match remainder {
-            10 | 11 => 0,
-            _ => remainder as u8,
-        }
-    }
-
     /// Parses a byte slice of numbers as an CPF, guessing the missing parts.
     ///
     /// # Examples
@@ -122,7 +103,7 @@ impl Cpf {
         }
 
         for i in 0..=1 {
-            let remainder = Cpf::remainder(numbers, i);
+            let remainder = calc_remainder(numbers, i);
             let check_digit = numbers[9 + i];
 
             if slice.len() < 11 {
@@ -139,11 +120,11 @@ impl Cpf {
     ///
     /// # Examples
     ///
-    /// ```rust, ignore
+    /// ```rust
     /// use brids::Cpf;
     ///
-    /// let cpf = Cpf::generate();
-    /// let bytes = cpf.as_bytes();
+    /// let cpf = "123.456.789-09".parse::<Cpf>().expect("Invalid CPF");
+    /// let digits = cpf.as_bytes();
     /// ```
     #[inline]
     pub fn as_bytes(&self) -> &[u8; 11] {
@@ -155,7 +136,7 @@ impl Cpf {
     ///
     /// # Examples
     ///
-    /// ```rust, ignore
+    /// ```rust
     /// use brids::Cpf;
     ///
     /// let cpf = Cpf::generate();
@@ -250,6 +231,11 @@ impl FromStr for Cpf {
             }
         }
 
+        // Checks the length
+        if i != 11 {
+            return Err(ParseCpfError::InvalidNumber);
+        }
+
         // Checks for repeated numbers
         let first_number = numbers[0];
         if numbers.iter().all(|&x| x == first_number) {
@@ -257,7 +243,7 @@ impl FromStr for Cpf {
         }
 
         for i in 0..=1 {
-            let remainder = Cpf::remainder(numbers, i);
+            let remainder = calc_remainder(numbers, i);
             let check_digit = numbers[9 + i];
 
             if remainder != check_digit {
@@ -278,8 +264,7 @@ impl Distribution<Cpf> for Standard {
         }
 
         for i in 0..=1 {
-            let remainder = Cpf::remainder(numbers, i);
-            numbers[9 + i] = remainder; // check digit
+            numbers[9 + i] = calc_remainder(numbers, i); // check digit
         }
 
         Cpf(numbers)
@@ -315,6 +300,25 @@ impl<'de> Deserialize<'de> for Cpf {
         }
 
         deserializer.deserialize_str(CpfStringVisitor)
+    }
+}
+
+#[inline]
+fn calc_remainder(numbers: impl IntoIterator<Item = u8>, i: usize) -> u8 {
+    let remainder = numbers
+        .into_iter()
+        // Includes the first check digit in the second iteration
+        .take(9 + i)
+        // 10, 9, 8, ... 3, 2; and after: 11, 10, 9, 8, ... 3, 2
+        .zip((2..=10 + i).rev())
+        .map(|(x, y)| u32::from(x) * y as u32)
+        .sum::<u32>()
+        * 10
+        % 11;
+
+    match remainder {
+        10 | 11 => 0,
+        _ => remainder as u8,
     }
 }
 
