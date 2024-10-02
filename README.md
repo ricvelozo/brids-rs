@@ -35,32 +35,21 @@ brids = { version = "0.5", default-features = false }
 Parse and format:
 
 ```rust
-use brids::Cpf;
-
-fn main() {
-    let mut buf = String::new();
-
-    println!("Enter a CPF number:");
-
-    while let Ok(2..) = std::io::stdin().read_line(&mut buf) {
-        match buf.trim().parse::<Cpf>() {
-            Ok(cpf) => println!("{cpf} is a valid number."),
-            Err(err) => eprintln!("Error: {err}"),
-        }
-        buf.clear();
-    }
-}
-```
-
-Generate random CNPJ and CPF numbers:
-
-```rust
 use brids::{Cnpj, Cpf};
 
-fn main() {
-    println!("Random CNPJ number: {}", Cnpj::generate());
-    println!("Random CPF number: {}", Cpf::generate());
-}
+let maybe_valid = "123.456.789-09".parse::<Cpf>();
+assert!(maybe_valid.is_ok()); // Checks validity
+
+let old_format = "123.456.789/09".parse::<Cpf>();
+assert!(old_format.is_ok()); // Accepts the old format too
+
+let unformatted = "12345678909".parse::<Cpf>().expect("Invalid CPF");
+let formatted = unformatted.to_string(); // Formats
+println!("CPF: {unformatted}"); // Formats too
+
+// Generate random CNPJ and CPF numbers
+println!("Random CNPJ number: {}", Cnpj::generate());
+println!("Random CPF number: {}", Cpf::generate());
 ```
 
 ## License

@@ -47,46 +47,39 @@
 //! ```rust
 //! use brids::Cpf;
 //!
-//! fn main() {
-//!     let mut buf = String::new();
+//! let maybe_valid = "123.456.789-09".parse::<Cpf>();
+//! assert!(maybe_valid.is_ok()); // Checks validity
 //!
-//!     println!("Enter a CPF number:");
+//! let old_format = "123.456.789/09".parse::<Cpf>();
+//! assert!(old_format.is_ok()); // Accepts the old format too
 //!
-//!     while let Ok(2..) = std::io::stdin().read_line(&mut buf) {
-//!         match buf.trim().parse::<Cpf>() {
-//!             Ok(cpf) => println!("{cpf} is a valid number."),
-//!             Err(err) => eprintln!("Error: {err}"),
-//!         }
-//!         buf.clear();
-//!     }
-//! }
+//! let unformatted = "12345678909".parse::<Cpf>().expect("Invalid CPF");
+//! let formatted = unformatted.to_string(); // Formats
+//! println!("CPF: {unformatted}"); // Formats too
 //! ```
 //!
-//! Generate random CNPJ and CPF numbers (you must enable the [`rand` feature](#dependencies)):
+//! Generate random CNPJ and CPF numbers (you must enable the [`rand` feature](#features)):
 //!
 //! ```rust, ignore
 //! use brids::{Cnpj, Cpf};
 //!
-//! fn main() {
-//!     println!("Random CNPJ number: {}", Cnpj::generate());
-//!     println!("Random CPF number: {}", Cpf::generate());
-//! }
+//! println!("Random CNPJ number: {}", Cnpj::generate());
+//! println!("Random CPF number: {}", Cpf::generate());
 //! ```
 //!
-//! Using a different generator:
+//! If you are using the `no_std` mode, the `::generate()` methods are unavailable; instantiate the
+//! generator directly instead:
 //!
 //! ```rust, ignore
 //! use brids::{Cnpj, Cpf};
 //! use rand::{rngs::StdRng, Rng, SeedableRng};
 //!
-//! fn main() {
-//!     let mut rng = StdRng::seed_from_u64(123);
-//!     println!("Random CNPJ number: {}", rng.gen::<Cnpj>());
-//!     println!("Random CPF number: {}", rng.gen::<Cpf>());
-//! }
+//! let mut rng = StdRng::seed_from_u64(123); // Available in `no_std` mode
+//! println!("Random CNPJ number: {}", rng.gen::<Cnpj>());
+//! println!("Random CPF number: {}", rng.gen::<Cpf>());
 //! ```
 //!
-//! Serialize and deserialize (you must enable the [`serde` feature](#dependencies)):
+//! Serialize and deserialize (you must enable the [`serde` feature](#features)):
 //!
 //! ```rust, ignore
 //! use brids::Cnpj;
@@ -99,20 +92,18 @@
 //!     cnpj: Cnpj,
 //! }
 //!
-//! fn main() {
-//!     let company1 = Company {
-//!         name: "Banco do Brasil S/A",
-//!         cnpj: "00.000.000/0001-91".parse().expect("Invalid CNPJ"),
-//!     };
+//! let company1 = Company {
+//!     name: "Banco do Brasil S/A",
+//!     cnpj: "00.000.000/0001-91".parse().expect("Invalid CNPJ"),
+//! };
 //!
-//!     // Serializes the struct into JSON
-//!     let json = serde_json::to_string(&company1).expect("Failed to serialize");
-//!     println!("{json}");
+//! // Serializes the struct into JSON
+//! let json = serde_json::to_string(&company1).expect("Failed to serialize");
+//! println!("{json}");
 //!
-//!     // Deserializes the struct back
-//!     let company2: Company = serde_json::from_str(&json).expect("Failed to deserialize");
-//!     assert_eq!(company1, company2);
-//! }
+//! // Deserializes the struct back
+//! let company2: Company = serde_json::from_str(&json).expect("Failed to deserialize");
+//! assert_eq!(company1, company2);
 //! ```
 
 #![cfg_attr(not(feature = "std"), no_std)]

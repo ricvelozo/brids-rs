@@ -168,7 +168,8 @@ impl Cnpj {
     }
 
     /// Generates a random number, using [`rand::thread_rng`] (requires `std` and `rand` features).
-    /// To use a different generator, instantiate the generator directly.
+    /// To use a different generator, instantiate the generator directly. The random CNPJ will be
+    /// the company headquarters.
     ///
     /// # Examples
     ///
