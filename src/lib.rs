@@ -75,8 +75,8 @@
 //! use rand::{rngs::StdRng, Rng, SeedableRng};
 //!
 //! let mut rng = StdRng::seed_from_u64(123); // Available in `no_std` mode
-//! println!("Random CNPJ number: {}", rng.gen::<Cnpj>());
-//! println!("Random CPF number: {}", rng.gen::<Cpf>());
+//! println!("Random CNPJ number: {}", rng.random::<Cnpj>());
+//! println!("Random CPF number: {}", rng.random::<Cpf>());
 //! ```
 //!
 //! Serialize and deserialize (you must enable the [`serde` feature](#features)):

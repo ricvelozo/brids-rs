@@ -16,13 +16,10 @@ use core::{
     str::FromStr,
 };
 
-#[cfg(all(feature = "std", feature = "rand"))]
-use rand::thread_rng;
-
 #[cfg(feature = "rand")]
 use rand::{
-    distributions::{Distribution, Standard},
     Rng,
+    distr::{Distribution, StandardUniform},
 };
 
 #[cfg(feature = "serde")]
@@ -167,7 +164,7 @@ impl Cnpj {
             .sum()
     }
 
-    /// Generates a random number, using [`rand::thread_rng`] (requires `std` and `rand` features).
+    /// Generates a random number, using [`rand::rng`] (requires `std` and `rand` features).
     /// To use a different generator, instantiate the generator directly. The random CNPJ will be
     /// the company headquarters.
     ///
@@ -181,7 +178,7 @@ impl Cnpj {
     #[cfg(all(feature = "std", feature = "rand"))]
     #[inline]
     pub fn generate() -> Self {
-        thread_rng().gen()
+        rand::rng().random()
     }
 }
 
@@ -296,11 +293,11 @@ impl FromStr for Cnpj {
 }
 
 #[cfg(feature = "rand")]
-impl Distribution<Cnpj> for Standard {
+impl Distribution<Cnpj> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cnpj {
         let mut numbers = [0; 14];
         for number in &mut numbers[..8] {
-            *number = rng.gen_range(0..=9);
+            *number = rng.random_range(0..=9);
         }
         numbers[11] = 1; // `0001` (company headquarters)
 

@@ -16,13 +16,10 @@ use core::{
     str::FromStr,
 };
 
-#[cfg(all(feature = "std", feature = "rand"))]
-use rand::thread_rng;
-
 #[cfg(feature = "rand")]
 use rand::{
-    distributions::{Distribution, Standard},
     Rng,
+    distr::{Distribution, StandardUniform},
 };
 
 #[cfg(feature = "serde")]
@@ -131,7 +128,7 @@ impl Cpf {
         &self.0
     }
 
-    /// Generates a random number, using [`rand::thread_rng`] (requires `std` and `rand` features).
+    /// Generates a random number, using [`rand::rng`] (requires `std` and `rand` features).
     /// To use a different generator, instantiate the generator directly.
     ///
     /// # Examples
@@ -144,7 +141,7 @@ impl Cpf {
     #[cfg(all(feature = "std", feature = "rand"))]
     #[inline]
     pub fn generate() -> Self {
-        thread_rng().gen()
+        rand::rng().random()
     }
 }
 
@@ -256,11 +253,11 @@ impl FromStr for Cpf {
 }
 
 #[cfg(feature = "rand")]
-impl Distribution<Cpf> for Standard {
+impl Distribution<Cpf> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Cpf {
         let mut numbers = [0; 11];
         for number in &mut numbers[..9] {
-            *number = rng.gen_range(0..=9);
+            *number = rng.random_range(0..=9);
         }
 
         for i in 0..=1 {
