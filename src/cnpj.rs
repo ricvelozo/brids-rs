@@ -312,6 +312,8 @@ impl Distribution<Cnpj> for StandardUniform {
 #[cfg(feature = "serde")]
 impl Serialize for Cnpj {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        use crate::alloc::string::ToString;
+
         serializer.serialize_str(&self.to_string())
     }
 }
@@ -396,7 +398,7 @@ mod tests {
         assert_eq!(27, cnpj.branch());
     }
 
-    #[cfg(feature = "rand")]
+    #[cfg(all(feature = "std", feature = "rand"))]
     #[test]
     fn generate() {
         let a = Cnpj::generate();

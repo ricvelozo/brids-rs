@@ -271,6 +271,8 @@ impl Distribution<Cpf> for StandardUniform {
 #[cfg(feature = "serde")]
 impl Serialize for Cpf {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        use crate::alloc::string::ToString;
+
         serializer.serialize_str(&self.to_string())
     }
 }
@@ -344,7 +346,7 @@ mod tests {
         assert_eq!(&a, b.as_bytes());
     }
 
-    #[cfg(feature = "rand")]
+    #[cfg(all(feature = "std", feature = "rand"))]
     #[test]
     fn generate() {
         let a = Cpf::generate();

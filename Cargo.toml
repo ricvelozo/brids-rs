@@ -46,7 +46,7 @@ required-features = ["std", "rand"]
 
 [[example]]
 name = "seed"
-required-features = ["rand"]
+required-features = ["std", "rand"]
 
 [[example]]
 name = "serde"

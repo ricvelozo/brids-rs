@@ -6,6 +6,7 @@ rust-latest:
   image: rust:latest
   script:
     - cargo test --verbose --no-default-features # no_std
+    - cargo test --verbose --no-default-features --features rand,serde # no_std
     - cargo test --verbose --all-features
 
 rust-beta:
@@ -13,6 +14,7 @@ rust-beta:
   image: rustdocker/rust:beta
   script:
     - cargo test --verbose --no-default-features # no_std
+    - cargo test --verbose --no-default-features --features rand,serde # no_std
     - cargo test --verbose --all-features
 
 rust-nightly:
@@ -20,5 +22,6 @@ rust-nightly:
   image: rustlang/rust:nightly
   script:
     - cargo test --verbose --no-default-features # no_std
+    - cargo test --verbose --no-default-features --features rand,serde # no_std
     - cargo test --verbose --all-features
   allow_failure: true
