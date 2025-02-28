@@ -136,7 +136,7 @@ impl Cnpj {
     /// ```rust
     /// use brids::Cnpj;
     ///
-    /// let cnpj = "00.000.000/0001-91".parse::<Cnpj>().expect("Invalid CNPJ");
+    /// let cnpj = "00.000.000/0001-91".parse::<Cnpj>().expect("invalid CNPJ");
     /// let digits = cnpj.as_bytes();
     /// ```
     #[inline]
@@ -151,7 +151,7 @@ impl Cnpj {
     /// ```rust
     /// use brids::Cnpj;
     ///
-    /// let cnpj = "00.000.000/0001-91".parse::<Cnpj>().expect("Invalid CNPJ");
+    /// let cnpj = "00.000.000/0001-91".parse::<Cnpj>().expect("invalid CNPJ");
     /// let branch = cnpj.branch(); // 1
     /// ```
     #[inline]

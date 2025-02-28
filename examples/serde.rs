@@ -23,14 +23,14 @@ struct Company<'a> {
 fn main() {
     let company1 = Company {
         name: "Banco do Brasil S/A",
-        cnpj: "00.000.000/0001-91".parse().expect("Invalid CNPJ"),
+        cnpj: "00.000.000/0001-91".parse().expect("invalid CNPJ"),
     };
 
     // Serializes the struct into JSON
-    let json = serde_json::to_string(&company1).expect("Failed to serialize");
+    let json = serde_json::to_string(&company1).expect("failed to serialize");
     println!("{json}");
 
     // Deserializes the struct back
-    let company2: Company = serde_json::from_str(&json).expect("Failed to deserialize");
+    let company2: Company = serde_json::from_str(&json).expect("failed to deserialize");
     assert_eq!(company1, company2);
 }

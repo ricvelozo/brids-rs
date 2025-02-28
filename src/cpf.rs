@@ -120,7 +120,7 @@ impl Cpf {
     /// ```rust
     /// use brids::Cpf;
     ///
-    /// let cpf = "123.456.789-09".parse::<Cpf>().expect("Invalid CPF");
+    /// let cpf = "123.456.789-09".parse::<Cpf>().expect("invalid CPF");
     /// let digits = cpf.as_bytes();
     /// ```
     #[inline]

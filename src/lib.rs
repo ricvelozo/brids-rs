@@ -53,7 +53,7 @@
 //! let old_format = "123.456.789/09".parse::<Cpf>();
 //! assert!(old_format.is_ok()); // Accepts the old format too
 //!
-//! let unformatted = "12345678909".parse::<Cpf>().expect("Invalid CPF");
+//! let unformatted = "12345678909".parse::<Cpf>().expect("invalid CPF");
 //! let formatted = unformatted.to_string(); // Formats
 //! println!("CPF: {unformatted}"); // Formats too
 //! ```
@@ -72,7 +72,7 @@
 //!
 //! ```rust, ignore
 //! use brids::{Cnpj, Cpf};
-//! use rand::{rngs::StdRng, Rng, SeedableRng};
+//! use rand::{Rng, SeedableRng, rngs::StdRng};
 //!
 //! let mut rng = StdRng::seed_from_u64(123); // Available in `no_std` mode
 //! println!("Random CNPJ number: {}", rng.random::<Cnpj>());
@@ -94,15 +94,15 @@
 //!
 //! let company1 = Company {
 //!     name: "Banco do Brasil S/A",
-//!     cnpj: "00.000.000/0001-91".parse().expect("Invalid CNPJ"),
+//!     cnpj: "00.000.000/0001-91".parse().expect("invalid CNPJ"),
 //! };
 //!
 //! // Serializes the struct into JSON
-//! let json = serde_json::to_string(&company1).expect("Failed to serialize");
+//! let json = serde_json::to_string(&company1).expect("failed to serialize");
 //! println!("{json}");
 //!
 //! // Deserializes the struct back
-//! let company2: Company = serde_json::from_str(&json).expect("Failed to deserialize");
+//! let company2: Company = serde_json::from_str(&json).expect("failed to deserialize");
 //! assert_eq!(company1, company2);
 //! ```
 
