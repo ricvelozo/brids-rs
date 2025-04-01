@@ -72,7 +72,8 @@
 //!
 //! ```rust, ignore
 //! use brids::{Cnpj, Cpf};
-//! use rand::{Rng, SeedableRng, rngs::StdRng};
+//! use rand::{Rng, SeedableRng};
+//! use rand::rngs::StdRng;
 //!
 //! let mut rng = StdRng::seed_from_u64(123); // Available in `no_std` mode
 //! println!("Random CNPJ number: {}", rng.random::<Cnpj>());

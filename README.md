@@ -43,7 +43,7 @@ assert!(maybe_valid.is_ok()); // Checks validity
 let old_format = "123.456.789/09".parse::<Cpf>();
 assert!(old_format.is_ok()); // Accepts the old format too
 
-let unformatted = "12345678909".parse::<Cpf>().expect("Invalid CPF");
+let unformatted = "12345678909".parse::<Cpf>().expect("invalid CPF");
 let formatted = unformatted.to_string(); // Formats
 println!("CPF: {unformatted}"); // Formats too
 

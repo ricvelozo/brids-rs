@@ -10,11 +10,9 @@
 //
 // SPDX-License-Identifier: (MIT OR Apache-2.0)
 
-use core::{
-    convert::TryFrom,
-    fmt::{self, Write},
-    str::FromStr,
-};
+use core::convert::TryFrom;
+use core::fmt::{self, Write};
+use core::str::FromStr;
 
 #[cfg(feature = "rand")]
 use rand::{
